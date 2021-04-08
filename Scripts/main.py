@@ -25,15 +25,6 @@ class MyApp(QMainWindow):
         super().__init__()
         self.initUI()
 
-    def initAndLoadMNIST():
-        datasetTransform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5),(0.5))])
-        TRAIN = datasets.MNIST(root ='INSERT DIRECTORY', train = True, transform = datasetTransform, download = True)
-        TEST = datasets.MNIST(root ='INSERT DIRECTORY', train = False, transform = datasetTransform, download = True)
-        #Load data with transformations
-        TESTLOADER = torch.utils.data.DataLoader(TEST, batch_size=batch_size)
-        TRAINLOADER = torch.utils.data.DataLoader(TRAIN, batch_size=batch_size)
-
-
     def initUI(self):
         self.setWindowIcon(QIcon('Icons\write.jpg'))
         self.setGeometry(300, 300, 300, 200)
@@ -77,4 +68,16 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = MyApp()
     sys.exit(app.exec_())
+
+
+def initAndLoadMNIST():
+    datasetTransform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5),(0.5))])
+    TRAIN = datasets.MNIST(root ='INSERT DIRECTORY', train = True, transform = datasetTransform, download = True)
+    TEST = datasets.MNIST(root ='INSERT DIRECTORY', train = False, transform = datasetTransform, download = True)
+    #Load data with transformations
+    TESTLOADER = torch.utils.data.DataLoader(TEST, batch_size=batch_size)
+    TRAINLOADER = torch.utils.data.DataLoader(TRAIN, batch_size=batch_size)
+
+def setModel():
+    model = models.resnet18(pretrained = False, progress = True)
 
