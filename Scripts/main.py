@@ -14,12 +14,25 @@ from torchvision import datasets, transforms
 import torchvision.models as models
 from torch import nn, optim
 
+#AI PARAMETERS
+epochNum = 
+batch_size = 
+learning_rate = 
 
 class MyApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
         self.initUI()
+
+    def initAndLoadMNIST():
+        datasetTransform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5),(0.5))])
+        TRAIN = datasets.MNIST(root ='INSERT DIRECTORY', train = True, transform = datasetTransform, download = True)
+        TEST = datasets.MNIST(root ='INSERT DIRECTORY', train = False, transform = datasetTransform, download = True)
+        #Load data with transformations
+        TESTLOADER = torch.utils.data.DataLoader(TEST, batch_size=batch_size)
+        TRAINLOADER = torch.utils.data.DataLoader(TRAIN, batch_size=batch_size)
+
 
     def initUI(self):
         self.setWindowIcon(QIcon('Icons\write.jpg'))
@@ -65,8 +78,3 @@ if __name__ == '__main__':
     ex = MyApp()
     sys.exit(app.exec_())
 
-
-#AI PARAMETERS
-epochNum = 
-batch_size = 
-learning_rate = 
