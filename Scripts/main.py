@@ -1,13 +1,18 @@
+#Image Processing
+import numpy as py
+import matplotlib.pyplot as plt
 
-# Imports for GUI related content
+#GUI Related Content
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, qApp
 from PyQt5.QtGui import QIcon, QPixmap
 
-# Imports for data and image processing/manipulation
-import numpy as np
-import matplotlib.pyplot as plt
-import sklearn.linear_model
+#AI Content
+from torchvision.datasets import MNIST
+import torch
+from torchvision import datasets, transforms
+import torchvision.models as models
+from torch import nn, optim
 
 
 class MyApp(QMainWindow):
