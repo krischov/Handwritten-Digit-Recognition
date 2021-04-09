@@ -1,6 +1,7 @@
 #Image Processing
-import numpy as py
+import numpy as np
 import matplotlib.pyplot as plt
+from skimage import util 
 
 #GUI Related Content
 import sys
@@ -26,12 +27,21 @@ def initAndLoadMNIST():
         transforms.ToTensor(),
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
     ])
+
     TRAIN = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = False)
     TEST = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download = False)
 
     #Load data with transformations
     TESTLOADER = torch.utils.data.DataLoader(TEST, batch_size=64)
     TRAINLOADER = torch.utils.data.DataLoader(TRAIN, batch_size=64)
+
+    dataiter = iter(TRAINLOADER)
+    images, labels = dataiter.next()
+
+    im2display = images[1].numpy().squeeze().transpose((1,2,0))
+    invertedImage = util.invert(im2display)
+    plt.imshow(invertedImage, interpolation='nearest', cmap='gray_r')
+    plt.show()
 
 
 class MyApp(QMainWindow):
