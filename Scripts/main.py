@@ -22,12 +22,13 @@ from torch import nn, optim
 def initAndLoadMNIST():
 
     datasetTransform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5),(0.5))])
-    TRAIN = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
-    TEST = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download = True)
+    TRAIN = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = False)
+    TEST = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download = False)
 
     #Load data with transformations
-    TESTLOADER = torch.utils.data.DataLoader(TEST, batch_size=batch_size)
-    TRAINLOADER = torch.utils.data.DataLoader(TRAIN, batch_size=batch_size)
+    TESTLOADER = torch.utils.data.DataLoader(TEST, batch_size=64)
+    TRAINLOADER = torch.utils.data.DataLoader(TRAIN, batch_size=64)
+
 
 class MyApp(QMainWindow):
 
