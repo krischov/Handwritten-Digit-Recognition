@@ -36,7 +36,7 @@ def initAndLoadMNIST():
     testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
 
 
-    # SHowing images
+    # Showing images
 
     # dataiter = iter(trainLoader)
     # images, labels = dataiter.next()
