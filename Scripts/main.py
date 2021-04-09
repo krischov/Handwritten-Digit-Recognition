@@ -6,7 +6,7 @@ from skimage.color import rgb2gray
 
 #GUI Related Content
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, qApp, QPushButton, QDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, qApp, QPushButton, QDialog, QGridLayout, QVBoxLayout, QHBoxLayout, QProgressBar, QLabel, QTextBrowser
 from PyQt5.QtGui import QIcon, QPixmap
 
 #AI Content
@@ -52,14 +52,39 @@ class MyApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
+        
 
     # Popup window for train model view
     def trainModelDialog(self):
+        
+        downloadMNIST = QPushButton('Download MNIST', self)
+        trainButton = QPushButton('Train', self)
+        cancelButton = QPushButton('Cancel', self)
+        progressBar = QProgressBar(self)
+        progressLabel = QLabel('Progress: ')
+        msg = QTextBrowser()
+        
+        
         widget = QDialog(self)
-        widget.resize(450, 250)
+        widget.setFixedSize(575, 300)
         widget.setWindowTitle('Dialog')
-        widget.exec_()
 
+        widgetGrid = QGridLayout()
+
+        # Grid layout for buttons
+        widget.setLayout(widgetGrid)
+        widgetGrid.addWidget(msg, 0, 0, 1, 4)
+        widgetGrid.addWidget(progressLabel, 1, 0)
+        widgetGrid.addWidget(progressBar, 1, 1, 1, 4)
+        widgetGrid.addWidget(downloadMNIST, 2, 0)
+        widgetGrid.addWidget(trainButton, 2, 1)
+        widgetGrid.addWidget(cancelButton, 2, 2)
+        
+        
+        
+
+        widget.exec_()
+        
 
     def initUI(self):
         self.setWindowIcon(QIcon('Icons\write.jpg'))
@@ -70,9 +95,7 @@ class MyApp(QMainWindow):
         trainModelView.setStatusTip('Train Model')
         trainModelView.triggered.connect(self.trainModelDialog)
 
-        downloadMNIST = QPushButton('Download MNIST', self)
-        downloadMNIST.move(100, 300)
-        downloadMNIST.resize(300, 50)
+        
    
         # File drop down to quit program
         quitProgram = QAction('Quit', self)
