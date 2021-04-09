@@ -15,9 +15,19 @@ import torchvision.models as models
 from torch import nn, optim
 
 #AI PARAMETERS
-epochNum = 
-batch_size = 
-learning_rate = 
+# epochNum = 
+# batch_size = 
+# learning_rate = 
+
+def initAndLoadMNIST():
+
+    datasetTransform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5),(0.5))])
+    TRAIN = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
+    TEST = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download = True)
+
+    #Load data with transformations
+    TESTLOADER = torch.utils.data.DataLoader(TEST, batch_size=batch_size)
+    TRAINLOADER = torch.utils.data.DataLoader(TRAIN, batch_size=batch_size)
 
 class MyApp(QMainWindow):
 
@@ -55,6 +65,7 @@ class MyApp(QMainWindow):
         filemenu.addAction(viewTrainingImages)
         filemenu.addAction(viewTestingImages)
 
+        initAndLoadMNIST()
         self.setWindowTitle('Handwritten Digit Recogniser')
         self.setGeometry(300, 300, 300, 200)
 
@@ -66,31 +77,26 @@ class MyApp(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    
     ex = MyApp()
     sys.exit(app.exec_())
 
 
 #Note all methods below need to be adjusted for scope of variables and may need to be removed from methods
 
-def initAndLoadMNIST():
-    datasetTransform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5),(0.5))])
-    TRAIN = datasets.MNIST(root ='INSERT DIRECTORY', train = True, transform = datasetTransform, download = True)
-    TEST = datasets.MNIST(root ='INSERT DIRECTORY', train = False, transform = datasetTransform, download = True)
-    #Load data with transformations
-    TESTLOADER = torch.utils.data.DataLoader(TEST, batch_size=batch_size)
-    TRAINLOADER = torch.utils.data.DataLoader(TRAIN, batch_size=batch_size)
+
 
 def setModel():
     model = models.resnet18(pretrained = False, progress = True)
 
-def trainModel(INSERT PARAMETERS):
+# def trainModel(INSERT PARAMETERS):
     #INSERT CODE HERE
     #Needs optimiser, 
 
-def testModel(INSERT PARAMETERS):
+# def testModel(INSERT PARAMETERS):
     #INSERT CODE HERE
 
-def ProcessAndRecogniseNumber();
+# def ProcessAndRecogniseNumber();
     #Insert COde HEre
     #Note this can be split into different methods
     #Code that puts turns input into image, processes as same way as TEST/TRAIN SETS
