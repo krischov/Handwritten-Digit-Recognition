@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import util 
+from skimage.color import rgb2gray
 
 #GUI Related Content
 import sys
@@ -40,6 +41,7 @@ def initAndLoadMNIST():
 
     im2display = images[1].numpy().squeeze().transpose((1,2,0))
     invertedImage = util.invert(im2display)
+
     plt.imshow(invertedImage, interpolation='nearest', cmap='gray_r')
     plt.show()
 
@@ -81,6 +83,7 @@ class MyApp(QMainWindow):
         filemenu.addAction(viewTestingImages)
 
         initAndLoadMNIST()
+
         self.setWindowTitle('Handwritten Digit Recogniser')
         self.setGeometry(300, 300, 300, 200)
 
