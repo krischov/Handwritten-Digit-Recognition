@@ -6,7 +6,7 @@ from skimage.color import rgb2gray
 
 #GUI Related Content
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, qApp
+from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, qApp, QPushButton, QDialog
 from PyQt5.QtGui import QIcon, QPixmap
 
 #AI Content
@@ -14,38 +14,36 @@ from torchvision.datasets import MNIST
 import torch
 from torchvision import datasets, transforms
 import torchvision.models as models
-from torch import nn, optim
+from torch import nn, optim, cuda
+from torch.utils import data
+from time import time
+
 
 #AI PARAMETERS
 # epochNum = 
-# batch_size = 
+batch_size = 64
 # learning_rate = 
+
+device = 'cuda' if cuda.is_available() else 'cpu'
 
 def initAndLoadMNIST():
 
-    datasetTransform = transforms.Compose([
-        # transforms.Grayscale(num_output_channels=3),
-        transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-    ])
-
-    TRAIN = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = False)
-    TEST = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download = False)
+    trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = transforms.ToTensor(), download = True)
+    testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = transforms.ToTensor())
 
     #Load data with transformations
-    TESTLOADER = torch.utils.data.DataLoader(TEST, batch_size=64)
-    TRAINLOADER = torch.utils.data.DataLoader(TRAIN, batch_size=64)
+    trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True)
+    testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
 
 
     # SHowing images
 
-    # dataiter = iter(TRAINLOADER)
+    # dataiter = iter(trainLoader)
     # images, labels = dataiter.next()
 
-    # im2display = images[1].numpy().squeeze().transpose((1,2,0))
-    # invertedImage = util.invert(im2display)
+    # im2display = images[1].numpy().squeeze()
 
-    # plt.imshow(invertedImage, interpolation='nearest', cmap='gray_r')
+    # plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
     # plt.show()
 
 
@@ -55,22 +53,30 @@ class MyApp(QMainWindow):
         super().__init__()
         self.initUI()
 
+    # Popup window for train model view
+    def trainModelDialog(self):
+        widget = QDialog(self)
+        widget.resize(450, 250)
+        widget.setWindowTitle('Dialog')
+        widget.exec_()
+
+
     def initUI(self):
         self.setWindowIcon(QIcon('Icons\write.jpg'))
-        self.setGeometry(300, 300, 300, 200)
 
-        # File drop down to train model
+
+        # Model train GUI section dealing with button presses, new dialog, and progress bar
         trainModelView = QAction('Train Model', self)
         trainModelView.setStatusTip('Train Model')
+        trainModelView.triggered.connect(self.trainModelDialog)
 
-
+        downloadMNIST = QPushButton('Download MNIST', self)
+        downloadMNIST.move(100, 300)
+        downloadMNIST.resize(300, 50)
+   
         # File drop down to quit program
         quitProgram = QAction('Quit', self)
         quitProgram.triggered.connect(qApp.quit)
-
-        # File drop downs for training and testing image viewing
-        viewTrainingImages = QAction('View Training Images', self)
-        viewTestingImages = QAction('View Testing Images', self)
 
         self.statusBar()
 
@@ -81,19 +87,21 @@ class MyApp(QMainWindow):
         filemenu.addAction(trainModelView)
         filemenu.addAction(quitProgram)
 
+
+        # File drop downs for training and testing image viewing
+        viewTrainingImages = QAction('View Training Images', self)
+        viewTestingImages = QAction('View Testing Images', self)
+
         filemenu = menubar.addMenu('&View')
         filemenu.addAction(viewTrainingImages)
         filemenu.addAction(viewTestingImages)
-
-        initAndLoadMNIST()
-
         self.setWindowTitle('Handwritten Digit Recogniser')
-        self.setGeometry(300, 300, 300, 200)
 
         # Configure size of window
         self.resize(600, 400)
         self.show()
 
+        initAndLoadMNIST()
 
 
 if __name__ == '__main__':
@@ -101,6 +109,8 @@ if __name__ == '__main__':
     
     ex = MyApp()
     sys.exit(app.exec_())
+
+
 
 
 #Note all methods below need to be adjusted for scope of variables and may need to be removed from methods
