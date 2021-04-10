@@ -6,8 +6,9 @@ from skimage.color import rgb2gray
 
 #GUI Related Content
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, qApp, QPushButton, QDialog, QGridLayout, QVBoxLayout, QHBoxLayout, QProgressBar, QLabel, QTextBrowser
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import *
+
+from PyQt5.QtGui import *
 
 #AI Content
 from torchvision.datasets import MNIST
@@ -47,7 +48,7 @@ def initAndLoadMNIST():
     # plt.show()
 
 
-class MyApp(QMainWindow):
+class mainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
@@ -57,18 +58,24 @@ class MyApp(QMainWindow):
     # Popup window for train model view
     def trainModelDialog(self):
         
+        # Buttons, Labels, and text browser to show progress
         downloadMNIST = QPushButton('Download MNIST', self)
         trainButton = QPushButton('Train', self)
         cancelButton = QPushButton('Cancel', self)
         progressBar = QProgressBar(self)
         progressLabel = QLabel('Progress: ')
+
+        # Creating text box to append download progress status
         msg = QTextBrowser()
+
+        # This is where you append the progress of the download as text
+        msg.append('Hello World, this is how you add text to this box')
         
         
+        # Dialog configuration and size
         widget = QDialog(self)
         widget.setFixedSize(575, 300)
         widget.setWindowTitle('Dialog')
-
         widgetGrid = QGridLayout()
 
         # Grid layout for buttons
@@ -79,14 +86,25 @@ class MyApp(QMainWindow):
         widgetGrid.addWidget(downloadMNIST, 2, 0)
         widgetGrid.addWidget(trainButton, 2, 1)
         widgetGrid.addWidget(cancelButton, 2, 2)
-        
-        
-        
 
         widget.exec_()
         
 
+    def openImage(self):
+        image = QPixmap('Icons\MNIST.PNG')
+        pic = QLabel(self)
+        pic.resize(600, 400)
+        pic.setScaledContents(True)
+        pic.setPixmap(image)
+        pic.show()
+
+
     def initUI(self):
+        initAndLoadMNIST()
+        viewTrainingImages = QAction('View Training Images', self)
+        viewTestingImages = QAction('View Testing Images', self)
+
+        viewTestingImages.triggered.connect(self.openImage)
         self.setWindowIcon(QIcon('Icons\write.jpg'))
 
 
@@ -100,8 +118,7 @@ class MyApp(QMainWindow):
         # File drop down to quit program
         quitProgram = QAction('Quit', self)
         quitProgram.triggered.connect(qApp.quit)
-
-        self.statusBar()
+        
 
 
         # Add menus and sub-menus to the program menu bar
@@ -112,8 +129,9 @@ class MyApp(QMainWindow):
 
 
         # File drop downs for training and testing image viewing
-        viewTrainingImages = QAction('View Training Images', self)
-        viewTestingImages = QAction('View Testing Images', self)
+
+
+
 
         filemenu = menubar.addMenu('&View')
         filemenu.addAction(viewTrainingImages)
@@ -121,16 +139,15 @@ class MyApp(QMainWindow):
         self.setWindowTitle('Handwritten Digit Recogniser')
 
         # Configure size of window
+        self.statusBar()
         self.resize(600, 400)
         self.show()
-
-        initAndLoadMNIST()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    
-    ex = MyApp()
+
+    ex = mainWindow()
     sys.exit(app.exec_())
 
 
