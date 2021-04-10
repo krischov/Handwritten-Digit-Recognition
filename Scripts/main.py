@@ -179,6 +179,10 @@ class TestNet(nn.Module):
 
 #
 
+model = TestNet()
+model.to(device)
+criterion = nn.NLLLoss()
+optimizer = optim.SGD(model.parameters(), lr = learning_rate, momentum = 0.5)
 
 
 
