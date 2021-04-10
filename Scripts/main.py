@@ -25,9 +25,12 @@ learning_rate = 0.02
 device = 'cuda' if cuda.is_available() else 'cpu'
 
 def initAndLoadMNIST():
-
-    trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = transforms.ToTensor(), download = True)
-    testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = transforms.ToTensor())
+    datasetTransform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5), (0.5)),
+    ])
+    trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
+    testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform)
 
     #Load data with transformations
     trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True)
