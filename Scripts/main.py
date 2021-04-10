@@ -143,6 +143,36 @@ if __name__ == '__main__':
 def setModel():
     model = models.resnet18(pretrained = False, progress = True)
 
+
+#Linear Model
+class TestNet(nn.Module):
+    super(Net, self). __init__()
+    self.l1 = nn.Linear(784, 700)
+    self.l2 = nn.Linear(700, 350)
+    self.l3 = nn.Linear(350, 175)
+    self.l4 = nn.Linear(175, 85)
+    self.l5 = nn.Linear(85, 30)
+    self.l6 = nn.Linear(30, 15)
+    self.l7 = nn.Linear(15, 10)
+
+    def forward(self, x):
+        x = x.view(-1, 784)
+        x = F.relu(self.l1(x))
+        x = F.relu(self.l2(x))
+        x = F.relu(self.l3(x))
+        x = F.relu(self.l4(x))
+        x = F.relu(self.l5(x))
+        x = f.relu(self.l6(x))
+        x = self.l7(x)
+        return (nn.LogSoftmax(dim = 1))
+
+#
+
+
+
+
+
+
 # def trainModel(INSERT PARAMETERS):
     #INSERT CODE HERE
     #Needs optimiser, 
