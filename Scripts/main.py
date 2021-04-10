@@ -184,7 +184,15 @@ model.to(device)
 criterion = nn.NLLLoss()
 optimizer = optim.SGD(model.parameters(), lr = learning_rate, momentum = 0.5)
 
-
+def train(epochNum):
+  model.train()
+  for i, (data, target) in enumerate(TRAINLOADER):
+    data, target = data.to(device), target.to(device)
+    optimizer.zero_grad()
+    output = model(data)
+    loss = criterion(output, target)
+    loss.backward()
+    optimizer.step()
 
 
 
