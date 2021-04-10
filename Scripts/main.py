@@ -1,13 +1,10 @@
 #Image Processing
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import util 
-from skimage.color import rgb2gray
 
 #GUI Related Content
 import sys
 from PyQt5.QtWidgets import *
-
 from PyQt5.QtGui import *
 
 #AI Content
@@ -16,6 +13,7 @@ import torch
 from torchvision import datasets, transforms
 import torchvision.models as models
 from torch import nn, optim, cuda
+import torch.nn.functional as F
 from torch.utils import data
 from time import time
 
