@@ -187,17 +187,6 @@ model.to(device)
 criterion = nn.NLLLoss()
 optimizer = optim.SGD(model.parameters(), lr = learning_rate, momentum = 0.5)
 
-def trainModel(epochNum):
-  model.train()
-  for i, (data, target) in enumerate(TRAINLOADER):
-    data, target = data.to(device), target.to(device)
-    optimizer.zero_grad()
-    output = model(data)
-    loss = criterion(output, target)
-    loss.backward()
-    optimizer.step()
-#Add calculations to get loss, progress, epoch number etc
-
 def testAccuracyModel(LOADER):
     model.eval()
     Test_Correct = 0
@@ -212,10 +201,29 @@ def testAccuracyModel(LOADER):
 
 def TrainOverEpochs(epochNum, LOADER):
     final_accuracy = 0
+    Training_Progress = 0
+    account = 0
+    flag = 0
     for epoch in range (1, epochNum + 1):
         #print(epoch)
-        trainModel(epoch)
-        if(epoch == epochNum):
-            final_accuracy = testAccuracyModel(LOADER)
+      model.train()
+      for i, (data, target) in enumerate(TRAINLOADER):
+        data, target = data.to(device), target.to(device)
+        optimizer.zero_grad()
+        output = model(data)
+        loss = criterion(output, target)
+        loss.backward()
+        optimizer.step()
+        Training_Progress = ((i/(len(TRAINLOADER)))/epochNum) * 100 + account
+        if(flag == 0):
+          if (Training_Progress %10 == 0):
+            flag = 1
+        elif(flag == 1):
+          if (Training_Progress %10 == 0):
+            account += 10
+            #flag = 0
+        print (Training_Progress)
+      if(epoch == epochNum):
+        final_accuracy = testAccuracyModel(LOADER)
     #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
     return (final_accuracy)
