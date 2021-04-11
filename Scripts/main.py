@@ -222,7 +222,7 @@ def TrainOverEpochs(epochNum, LOADER):
           if (Training_Progress %10 == 0):
             account += 10
             #flag = 0
-        print (Training_Progress)
+        #print (Training_Progress)
       if(epoch == epochNum):
         final_accuracy = testAccuracyModel(LOADER)
     #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
