@@ -187,7 +187,7 @@ model.to(device)
 criterion = nn.NLLLoss()
 optimizer = optim.SGD(model.parameters(), lr = learning_rate, momentum = 0.5)
 
-def trainFunction(epochNum):
+def trainModel(epochNum):
   model.train()
   for i, (data, target) in enumerate(TRAINLOADER):
     data, target = data.to(device), target.to(device)
@@ -212,22 +212,10 @@ def testAccuracyModel(LOADER):
 
 def TrainOverEpochs(epochNum, LOADER):
     final_accuracy = 0
-    for epoch in range (1, epochNum)
+    for epoch in range (1, epochNum + 1):
+        #print(epoch)
         trainModel(epoch)
-        if(epoch = epochNum):
+        if(epoch == epochNum):
             final_accuracy = testAccuracyModel(LOADER)
-    torch.save(model.save.dict(), 'ADD PATH')
+    #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
     return (final_accuracy)
-
-
-
-
-
-# def ProcessAndLoadImage();
-    #Insert COde HEre
-    #Note this can be split into different methods
-    #Code that puts turns input into image, processes as same way as TEST/TRAIN SETS
-    #LOADS INTO NEW LOADER
-    #Passes image to AI
-    #Returns ai output
-    #Shows probability?
