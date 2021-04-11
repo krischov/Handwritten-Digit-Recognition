@@ -198,12 +198,29 @@ def trainFunction(epochNum):
     optimizer.step()
 #Add calculations to get loss, progress, epoch number etc
 
-def testModel(TESTLOADER):
+def testAccuracyModel(LOADER):
     model.eval()
-    for data, target in TESTLOADER:
+    Test_Correct = 0
+    Loader_size = len(LOADER.dataset)
+    for data, target in LOADER:
         data, target = data.to(device), target.to(device)
         output = model(data)
-    #ADD CALCULATIONS TO GET ACCURACY
+        pred = output.data.max(1, keepdim=True)[1]
+        Test_Correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+    Accuracy = 100 * (Test_Correct/Loader_size)
+    return Accuracy
+
+def TrainOverEpochs(epochNum, LOADER):
+    final_accuracy = 0
+    for epoch in range (1, epochNum)
+        trainModel(epoch)
+        if(epoch = epochNum):
+            final_accuracy = testAccuracyModel(LOADER)
+    torch.save(model.save.dict(), 'ADD PATH')
+    return (final_accuracy)
+
+
+
 
 
 # def ProcessAndLoadImage();
