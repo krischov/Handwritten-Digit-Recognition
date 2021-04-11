@@ -234,8 +234,8 @@ def TrainOverEpochs(epochNum, LOADER):
 #Need to Implement a way to get a list of probabilities
 
 def ShowProbabilityGraph(Loader):
-  images, labels = next(iter(Loader))
-  img = images[1].view(1, 784)
+  data, target = next(iter(Loader))
+  img = data[0].view(1, 784)
   ConvertedLogValue = torch.exp(model(img))
   ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
   label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
