@@ -15,7 +15,7 @@ import torchvision.models as models
 from torch import nn, optim, cuda
 import torch.nn.functional as F
 from torch.utils import data
-from time import time
+import time
 
 
 #AI PARAMETERS
