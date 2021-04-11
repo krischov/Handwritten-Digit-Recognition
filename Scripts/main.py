@@ -221,6 +221,7 @@ def TrainOverEpochs(epochNum, LOADER):
         elif(flag == 1):
           if (Training_Progress %10 == 0):
             account += 10
+            Training_Progress += 10 
             #flag = 0
         #print (Training_Progress)
       if(epoch == epochNum):
