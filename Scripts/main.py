@@ -233,9 +233,14 @@ def TrainOverEpochs(epochNum, LOADER):
 #Basic Code for Probability Graph
 #Need to Implement a way to get a list of probabilities
 
-label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-plt.barh(label,ProbabilityList)
-plt.title('Class Probability')
-plt.ylabel('Number')
-plt.xlabel('Probability')
-plt.show()
+def ShowProbabilityGraph(Loader):
+  images, labels = next(iter(Loader))
+  img = images[1].view(1, 784)
+  ConvertedLogValue = torch.exp(model(img))
+  ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+  label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  plt.barh(label,ProbabilityList)
+  plt.title('Class Probability')
+  plt.ylabel('Number')
+  plt.xlabel('Probability')
+  plt.show()
