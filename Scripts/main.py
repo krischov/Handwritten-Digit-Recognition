@@ -48,6 +48,114 @@ def initAndLoadMNIST():
     # plt.show()
 
 
+#GUI Related Content
+import sys
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+
+
+
+# This class will be a 2nd main window and will switch between the 2 upon event
+class canvas(QMainWindow):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.show()
+
+        # Window configurations
+        top = 400
+        left = 400
+        width = 600
+        height = 400
+
+        self.setWindowTitle("Drawing Recognition")
+        self.setGeometry(top, left, width, height)
+
+        # Configure drawing canvas and colour format to be grayscale. Also make canvas white
+        self.canvasImage = QImage(self.size(), QImage.Format_Grayscale8)
+        self.canvasImage.fill(Qt.white)
+
+        # Drawing pen configurations
+        self.drawing = False
+        self.lastPoint = QPoint()
+
+        # Menu bar setup
+        mainMenu = self.menuBar()
+        fileMenu = mainMenu.addMenu("File")
+        modelMenu = mainMenu.addMenu("Model")
+        
+        # Save file in image format onto hard drive for analysis
+        saveAction = QAction(QIcon("Icons\save.png"), "Save", self)
+        saveAction.setShortcut("Ctrl+S")
+        saveAction.triggered.connect(self.save)
+
+        # Clear canvas
+        clearAction = QAction(QIcon("Icons\clear.png"), "Clear", self)
+        clearAction.setShortcut("Ctrl+C")
+        clearAction.triggered.connect(self.clear)
+
+        # Action to recognise the number drawn
+        recogniseAction = QAction(QIcon("Icons\write.jpg"), "Recognise", self)
+        recogniseAction.triggered.connect(self.clear)
+
+        # Select Linear Model (Linear by default, so this dropdown is only for aesthetics)
+        linearModel = QAction(QIcon("Icons\linearModel.png"), "Linear", self)
+        linearModel.triggered.connect(self.clear)
+
+        # Adding actions to drop down menus
+        fileMenu.addAction(clearAction)
+        fileMenu.addAction(saveAction)
+        fileMenu.addAction(recogniseAction)
+        modelMenu.addAction(linearModel)
+
+    # Close parent window
+    def closeEvent(self, QCloseEvent):
+        self.parent.setWindowOpacity(1.)
+
+    # Check for mouse press
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.drawing = True
+            self.lastPoint = event.pos()
+
+    # Check mouse move
+    def mouseMoveEvent(self, event):
+        if (event.buttons() & Qt.LeftButton) & self.drawing:
+            painter = QPainter(self.canvasImage)
+            painter.setPen(QPen(Qt.black, 4, Qt.SolidLine,
+            Qt.RoundCap, Qt.RoundJoin))
+
+            painter.drawLine(self.lastPoint, event.pos())
+            self.lastPoint = event.pos()
+            self.update()
+
+    # Check mouse release
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.drawing = False
+    
+
+    # Paints stroke from when mouse is clicked and follows
+    def paintEvent(self, event):
+        canvasPainter = QPainter(self)
+        canvasPainter.drawImage(self.rect(), self.canvasImage, self.canvasImage.rect())
+        
+    # Save function for recognition
+    def save(self):
+        filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "PNG(*.png);;JPEG(*.jpg *.jpeg);; ALL Files(*.*)")
+        if filePath == "":
+            return
+        self.canvasImage.save(filePath)
+
+    def clear(self):
+        self.canvasImage.fill(Qt.white)
+        self.update()
+
+
+
+
+# This class manages the main window and all the drop downs to train model and view images
 class mainWindow(QMainWindow):
 
     def __init__(self):
@@ -89,7 +197,7 @@ class mainWindow(QMainWindow):
 
         widget.exec_()
         
-
+    # Adds image and resizes to a dropdown menu
     def openImage(self):
         image = QPixmap('Icons\MNIST.PNG')
         pic = QLabel(self)
@@ -98,28 +206,25 @@ class mainWindow(QMainWindow):
         pic.setPixmap(image)
         pic.show()
 
-
     def initUI(self):
-        initAndLoadMNIST()
         viewTrainingImages = QAction('View Training Images', self)
+        viewTrainingImages.triggered.connect(self.callAnotherQMainWindow)
+
+        
         viewTestingImages = QAction('View Testing Images', self)
 
         viewTestingImages.triggered.connect(self.openImage)
         self.setWindowIcon(QIcon('Icons\write.jpg'))
 
-
         # Model train GUI section dealing with button presses, new dialog, and progress bar
         trainModelView = QAction('Train Model', self)
         trainModelView.setStatusTip('Train Model')
         trainModelView.triggered.connect(self.trainModelDialog)
-
-        
    
         # File drop down to quit program
         quitProgram = QAction('Quit', self)
         quitProgram.triggered.connect(qApp.quit)
         
-
 
         # Add menus and sub-menus to the program menu bar
         menubar = self.menuBar()
@@ -129,10 +234,6 @@ class mainWindow(QMainWindow):
 
 
         # File drop downs for training and testing image viewing
-
-
-
-
         filemenu = menubar.addMenu('&View')
         filemenu.addAction(viewTrainingImages)
         filemenu.addAction(viewTestingImages)
@@ -143,13 +244,17 @@ class mainWindow(QMainWindow):
         self.resize(600, 400)
         self.show()
 
+    # closes parent window and opens child window by setting opacity to 0
+    def callAnotherQMainWindow(self):
+        win = canvas(self)
+        self.setWindowOpacity(100) # Set to 0. if you want to toggle between windows, otherwise set to 100 if you want both open
+ 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     ex = mainWindow()
     sys.exit(app.exec_())
-
 
 
 
