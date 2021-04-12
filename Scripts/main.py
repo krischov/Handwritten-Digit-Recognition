@@ -66,8 +66,8 @@ class canvas(QMainWindow):
         # Window configurations
         top = 400
         left = 400
-        width = 600
-        height = 400
+        width = 560
+        height = 560
 
         self.setWindowTitle("Drawing Recognition")
         self.setGeometry(top, left, width, height)
@@ -75,6 +75,7 @@ class canvas(QMainWindow):
         # Configure drawing canvas and colour format to be grayscale. Also make canvas white
         self.canvasImage = QImage(self.size(), QImage.Format_Grayscale8)
         self.canvasImage.fill(Qt.white)
+        
 
         # Drawing pen configurations
         self.drawing = False
@@ -85,10 +86,10 @@ class canvas(QMainWindow):
         fileMenu = mainMenu.addMenu("File")
         modelMenu = mainMenu.addMenu("Model")
         
-        # Save file in image format onto hard drive for analysis
-        saveAction = QAction(QIcon("Icons\save.png"), "Save", self)
-        saveAction.setShortcut("Ctrl+S")
-        saveAction.triggered.connect(self.save)
+        # # Save file in image format onto hard drive for analysis
+        # saveAction = QAction(QIcon("Icons\save.png"), "Save", self)
+        # saveAction.setShortcut("Ctrl+S")
+        # saveAction.triggered.connect(self.save)
 
         # Clear canvas
         clearAction = QAction(QIcon("Icons\clear.png"), "Clear", self)
@@ -97,7 +98,8 @@ class canvas(QMainWindow):
 
         # Action to recognise the number drawn
         recogniseAction = QAction(QIcon("Icons\write.jpg"), "Recognise", self)
-        recogniseAction.triggered.connect(self.clear)
+        recogniseAction.setShortcut("Ctrl+R")
+        recogniseAction.triggered.connect(self.saveAndRecognise)
 
         # Select Linear Model (Linear by default, so this dropdown is only for aesthetics)
         linearModel = QAction(QIcon("Icons\linearModel.png"), "Linear", self)
@@ -105,7 +107,7 @@ class canvas(QMainWindow):
 
         # Adding actions to drop down menus
         fileMenu.addAction(clearAction)
-        fileMenu.addAction(saveAction)
+        # fileMenu.addAction(saveAction)
         fileMenu.addAction(recogniseAction)
         modelMenu.addAction(linearModel)
 
@@ -123,7 +125,7 @@ class canvas(QMainWindow):
     def mouseMoveEvent(self, event):
         if (event.buttons() & Qt.LeftButton) & self.drawing:
             painter = QPainter(self.canvasImage)
-            painter.setPen(QPen(Qt.black, 4, Qt.SolidLine,
+            painter.setPen(QPen(Qt.black, 40, Qt.SolidLine,
             Qt.RoundCap, Qt.RoundJoin))
 
             painter.drawLine(self.lastPoint, event.pos())
@@ -142,11 +144,12 @@ class canvas(QMainWindow):
         canvasPainter.drawImage(self.rect(), self.canvasImage, self.canvasImage.rect())
         
     # Save function for recognition
-    def save(self):
+    def saveAndRecognise(self):
         filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "PNG(*.png);;JPEG(*.jpg *.jpeg);; ALL Files(*.*)")
         if filePath == "":
             return
-        self.canvasImage.save(filePath)
+        self.scaledImage = self.canvasImage.scaled(28, 28)
+        self.scaledImage.save(filePath)
 
     def clear(self):
         self.canvasImage.fill(Qt.white)
