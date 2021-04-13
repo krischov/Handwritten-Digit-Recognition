@@ -56,26 +56,26 @@ testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffl
 
 #Linear Model
 class TestNet(nn.Module):
-  def __init__(self):
-    super(TestNet, self).__init__()
-    self.l1 = nn.Linear(784, 700)
-    self.l2 = nn.Linear(700, 350)
-    self.l3 = nn.Linear(350, 175)
-    self.l4 = nn.Linear(175, 85)
-    self.l5 = nn.Linear(85, 30)
-    self.l6 = nn.Linear(30, 15)
-    self.l7 = nn.Linear(15, 10)
+    def __init__(self):
+        super(TestNet, self).__init__()
+        self.l1 = nn.Linear(784, 700)
+        self.l2 = nn.Linear(700, 350)
+        self.l3 = nn.Linear(350, 175)
+        self.l4 = nn.Linear(175, 85)
+        self.l5 = nn.Linear(85, 30)
+        self.l6 = nn.Linear(30, 15)
+        self.l7 = nn.Linear(15, 10)
 
-  def forward(self, x):
-    x = x.view(-1, 784)
-    x = F.relu(self.l1(x))
-    x = F.relu(self.l2(x))
-    x = F.relu(self.l3(x))
-    x = F.relu(self.l4(x))
-    x = F.relu(self.l5(x))
-    x = F.relu(self.l6(x))
-    x = self.l7(x)
-    return F.log_softmax(x)
+    def forward(self, x):
+        x = x.view(-1, 784)
+        x = F.relu(self.l1(x))
+        x = F.relu(self.l2(x))
+        x = F.relu(self.l3(x))
+        x = F.relu(self.l4(x))
+        x = F.relu(self.l5(x))
+        x = F.relu(self.l6(x))
+        x = self.l7(x)
+        return F.log_softmax(x)
 
 #
 
@@ -96,6 +96,7 @@ def testAccuracyModel(LOADER):
     Accuracy = 100 * (Test_Correct/Loader_size)
     return Accuracy
 
+
 def TrainOverEpochs(epochNum, LOADER):
     final_accuracy = 0
     Training_Progress = 0
@@ -114,20 +115,20 @@ def TrainOverEpochs(epochNum, LOADER):
         Training_Progress = ((i/(len(TRAINLOADER)))/epochNum) * 100 + account
 
         if(flag == 0):
-          if (Training_Progress %10 == 0):
-            flag = 1
+            if (Training_Progress %10 == 0):
+                flag = 1
 
         elif(flag == 1):
-          if (Training_Progress %10 == 0):
-            account += 10
-            Training_Progress += 10 
+            if (Training_Progress %10 == 0):
+                account += 10
+                Training_Progress += 10 
 
-            #flag = 0
-        #print (Training_Progress)
+                #flag = 0
+                #print (Training_Progress)
 
-      if(epoch == epochNum):
-        final_accuracy = testAccuracyModel(LOADER)
-    #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
+        if(epoch == epochNum):
+            final_accuracy = testAccuracyModel(LOADER)
+            #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
 
     return (final_accuracy)
 
@@ -136,16 +137,16 @@ def TrainOverEpochs(epochNum, LOADER):
 #Need to Implement a way to get a list of probabilities
 
 def ShowProbabilityGraph(Loader):
-  data, target = next(iter(Loader))
-  img = data[0].view(1, 784)
-  ConvertedLogValue = torch.exp(model(img))
-  ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-  label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-  plt.barh(label,ProbabilityList)
-  plt.title('Class Probability')
-  plt.ylabel('Number')
-  plt.xlabel('Probability')
-  plt.show()
+    data, target = next(iter(Loader))
+    img = data[0].view(1, 784)
+    ConvertedLogValue = torch.exp(model(img))
+    ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+    label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    plt.barh(label,ProbabilityList)
+    plt.title('Class Probability')
+    plt.ylabel('Number')
+    plt.xlabel('Probability')
+    plt.show()
 
 
 
