@@ -22,13 +22,12 @@ import time
 epochNum = 20
 batch_size = 64
 learning_rate = 0.02
-device = 'cpu'
+device = 'cuda' if cuda.is_available() else 'cpu'
 
 #Global Variable
 global Current_Training_Progress
 
 
-#Note all methods below need to be adjusted for scope of variables and may need to be removed from methods
 
 
 #Linear Model
@@ -48,6 +47,14 @@ class TestNet(nn.Module):
     x = self.l4(x)
     return F.log_softmax(x)
 
+# Neural network configuration and creation
+model = TestNet()
+model.to(device)
+criterion = nn.NLLLoss()
+optimizer = optim.SGD(model.parameters(), lr = learning_rate, momentum = 0.5)
+
+
+# Tests for accuracy of the model and prints a percentage
 def testAccuracyModel(LOADER):
     model.eval()
     Test_Correct = 0
@@ -60,56 +67,57 @@ def testAccuracyModel(LOADER):
     Accuracy = 100 * (Test_Correct/Loader_size)
     return Accuracy
 
+
+# Trains the model over x amount of epochs (20 in this case)
 def TrainOverEpochs(epochNum, LOADER):
     final_accuracy = 0
     Percentage_Progress = 0
     account = 0
     flag = 0
     for epoch in range (1, epochNum + 1):
-        #print(epoch)
-      model.train()
-      for i, (data, target) in enumerate(trainLoader):
-        #Code that trains the model
-        data, target = data.to(device), target.to(device)
-        optimizer.zero_grad()
-        output = model(data)
-        loss = criterion(output, target)
-        loss.backward()
-        optimizer.step()
+        model.train()
+        for i, (data, target) in enumerate(trainLoader):
+            #Code that trains the model
+            data, target = data.to(device), target.to(device)
+            optimizer.zero_grad()
+            output = model(data)
+            loss = criterion(output, target)
+            loss.backward()
+            optimizer.step()
         
-        #Code that keeps track of the training progress
-        Batch_Progress = (i/(len(trainLoader)))
-        Percentage_Progress = Batch_Progress * 100 
-        if(flag == 0):
-            if(Percentage_Progress == 0):
-                flag = 1
-        elif(flag == 1):
-            if(Percentage_Progress == 0):
-                account += (100/(epochNum))
-        Current_Training_Progress = Percentage_Progress*(1/epochNum) + account
-        print(Current_Training_Progress)
+            #Code that keeps track of the training progress
+            Batch_Progress = (i/(len(trainLoader)))
+            Percentage_Progress = Batch_Progress * 100 
 
-    #Code that Calculates Final Accuracy
-      if(epoch == epochNum):
-        final_accuracy = testAccuracyModel(LOADER)
-        print(final_accuracy)
-    #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
+            if(flag == 0):
+                if(Percentage_Progress == 0):
+                    flag = 1
+
+            elif(flag == 1):
+                if(Percentage_Progress == 0):
+                    account += (100/(epochNum))
+            Current_Training_Progress = Percentage_Progress*(1/epochNum) + account
+            print(Current_Training_Progress)
+
+        #Code that Calculates Final Accuracy
+        if(epoch == epochNum):
+            final_accuracy = testAccuracyModel(LOADER)
+            print(final_accuracy)
+            #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
 
 
 #Basic Code for Probability Graph
-#Need to Implement a way to get a list of probabilities
-
 def ShowProbabilityGraph(Loader):
-  data, target = next(iter(Loader))
-  img = data[0].view(1, 784)
-  ConvertedLogValue = torch.exp(model(img))
-  ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-  label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-  plt.barh(label,ProbabilityList)
-  plt.title('Class Probability')
-  plt.ylabel('Number')
-  plt.xlabel('Probability')
-  plt.show()
+    data, target = next(iter(Loader))
+    img = data[0].view(1, 784)
+    ConvertedLogValue = torch.exp(model(img))
+    ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+    label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    plt.barh(label,ProbabilityList)
+    plt.title('Class Probability')
+    plt.ylabel('Number')
+    plt.xlabel('Probability')
+    plt.show()
 
 
 #Transforms
@@ -125,6 +133,21 @@ datasetTransform2 = transforms.Compose([
     transforms.Normalize((0.5), (0.5)),
 ])
 
+# Train and test data
+trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
+testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download = True)
+
+#Load data with transformations
+trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True)
+testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
+
+
+
+recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
+Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
+
+TrainOverEpochs(epochNum, testLoader)
+ShowProbabilityGraph(Data)
 
 
 
