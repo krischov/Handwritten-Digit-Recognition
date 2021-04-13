@@ -142,7 +142,7 @@ trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuf
 testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
 
 
-
+# Reading image file
 recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
 Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
 
