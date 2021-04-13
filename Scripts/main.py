@@ -253,7 +253,9 @@ class canvas(QMainWindow):
         self.scaledImage = self.canvasImage.scaled(28, 28)
 
         self.scaledImage.save('Scripts\digitDrawn.png')
-        print(self.scaledImage.shape())
+
+        
+        # print(self.scaledImage.shape())
 
     def clear(self):
         self.canvasImage.fill(Qt.white)
