@@ -23,30 +23,11 @@ import time
 epochNum = 10
 batch_size = 64
 learning_rate = 0.02
-device = 'cuda' if cuda.is_available() else 'cpu'
+device = 'cpu'
 
-def initAndLoadMNIST():
-    datasetTransform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.5), (0.5)),
-])
-trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
-testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download=True)
+#Global Variable
+Current_Training_Progress = 0
 
-#Load data with transformations
-trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True)
-testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
-
-
-# Showing images
-
-# dataiter = iter(trainLoader)
-# images, labels = dataiter.next()
-
-# im2display = images[1].numpy().squeeze()
-
-# plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
-# plt.show()
 
 
 
@@ -56,26 +37,26 @@ testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffl
 
 #Linear Model
 class TestNet(nn.Module):
-    def __init__(self):
-        super(TestNet, self).__init__()
-        self.l1 = nn.Linear(784, 700)
-        self.l2 = nn.Linear(700, 350)
-        self.l3 = nn.Linear(350, 175)
-        self.l4 = nn.Linear(175, 85)
-        self.l5 = nn.Linear(85, 30)
-        self.l6 = nn.Linear(30, 15)
-        self.l7 = nn.Linear(15, 10)
+  def __init__(self):
+    super(TestNet, self).__init__()
+    self.l1 = nn.Linear(784, 700)
+    self.l2 = nn.Linear(700, 350)
+    self.l3 = nn.Linear(350, 175)
+    self.l4 = nn.Linear(175, 85)
+    self.l5 = nn.Linear(85, 30)
+    self.l6 = nn.Linear(30, 15)
+    self.l7 = nn.Linear(15, 10)
 
-    def forward(self, x):
-        x = x.view(-1, 784)
-        x = F.relu(self.l1(x))
-        x = F.relu(self.l2(x))
-        x = F.relu(self.l3(x))
-        x = F.relu(self.l4(x))
-        x = F.relu(self.l5(x))
-        x = F.relu(self.l6(x))
-        x = self.l7(x)
-        return F.log_softmax(x)
+  def forward(self, x):
+    x = x.view(-1, 784)
+    x = F.relu(self.l1(x))
+    x = F.relu(self.l2(x))
+    x = F.relu(self.l3(x))
+    x = F.relu(self.l4(x))
+    x = F.relu(self.l5(x))
+    x = F.relu(self.l6(x))
+    x = self.l7(x)
+    return F.log_softmax(x)
 
 #
 
@@ -96,14 +77,14 @@ def testAccuracyModel(LOADER):
     Accuracy = 100 * (Test_Correct/Loader_size)
     return Accuracy
 
-
 def TrainOverEpochs(epochNum, LOADER):
     final_accuracy = 0
-    Training_Progress = 0
+    Percentage_Progress = 0
     account = 0
     flag = 0
     for epoch in range (1, epochNum + 1):
         #print(epoch)
+<<<<<<< Updated upstream
         model.train()
         for i, (data, target) in enumerate(TRAINLOADER):
             data, target = data.to(device), target.to(device)
@@ -114,41 +95,72 @@ def TrainOverEpochs(epochNum, LOADER):
             optimizer.step()
             Training_Progress = ((i/(len(TRAINLOADER)))/epochNum) * 100 + account
 
+=======
+      model.train()
+      for i, (data, target) in enumerate(trainLoader):
+        #Code that trains the model
+        data, target = data.to(device), target.to(device)
+        optimizer.zero_grad()
+        output = model(data)
+        loss = criterion(output, target)
+        loss.backward()
+        optimizer.step()
+        
+        #Code that keeps track of the training progress
+        Batch_Progress = (i/(len(trainLoader)))
+        Percentage_Progress = Batch_Progress * 100 
+>>>>>>> Stashed changes
         if(flag == 0):
-            if (Training_Progress %10 == 0):
+            if(Percentage_Progress == 0):
                 flag = 1
-
         elif(flag == 1):
-            if (Training_Progress %10 == 0):
+            if(Percentage_Progress == 0):
                 account += 10
-                Training_Progress += 10 
+        Current_Training_Progress = Percentage_Progress*(1/epochNum) + account
 
-                #flag = 0
-                #print (Training_Progress)
-
-        if(epoch == epochNum):
-            final_accuracy = testAccuracyModel(LOADER)
-            #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
-
-    return (final_accuracy)
+    #Code that Calculates Final Accuracy
+      if(epoch == epochNum):
+        final_accuracy = testAccuracyModel(LOADER)
+    #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
 
 
 #Basic Code for Probability Graph
 #Need to Implement a way to get a list of probabilities
 
 def ShowProbabilityGraph(Loader):
-    data, target = next(iter(Loader))
-    img = data[0].view(1, 784)
-    ConvertedLogValue = torch.exp(model(img))
-    ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-    label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-    plt.barh(label,ProbabilityList)
-    plt.title('Class Probability')
-    plt.ylabel('Number')
-    plt.xlabel('Probability')
-    plt.show()
+  data, target = next(iter(Loader))
+  img = data[0].view(1, 784)
+  ConvertedLogValue = torch.exp(model(img))
+  ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+  label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  plt.barh(label,ProbabilityList)
+  plt.title('Class Probability')
+  plt.ylabel('Number')
+  plt.xlabel('Probability')
+  plt.show()
+
+  def initAndLoadMNIST():
+    datasetTransform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5), (0.5)),
+    ])
+    trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
+    testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download=True)
+
+    #Load data with transformations
+    trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True)
+    testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
 
 
+    # Showing images
+
+    # dataiter = iter(trainLoader)
+    # images, labels = dataiter.next()
+
+    # im2display = images[1].numpy().squeeze()
+
+    # plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
+    # plt.show()
 
 
 
@@ -275,6 +287,8 @@ class mainWindow(QMainWindow):
         progressBar = QProgressBar(self)
         progressLabel = QLabel('Progress: ')
 
+        
+
         # Creating text box to append download progress status
         msg = QTextBrowser()
         def downloadDataset(self):
@@ -287,13 +301,12 @@ class mainWindow(QMainWindow):
         
         # Buttons, Labels, and text browser to show progress
         downloadMNIST = QPushButton('Download MNIST', self)
-        downloadMNIST.clicked.connect(downloadDataset)
-        
+        downloadMNIST.clicked.connect()
         
         # Dialog configuration and size
         widget = QDialog(self)
         widget.setFixedSize(560, 560)
-        widget.setWindowTitle('Dialog')
+        widget.setWindowTitle('Our Dialog')
         widgetGrid = QGridLayout()
 
         # Grid layout for buttons
