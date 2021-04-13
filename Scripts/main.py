@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 
 #AI Content
 from torchvision.datasets import MNIST
@@ -30,7 +31,7 @@ def initAndLoadMNIST():
         transforms.Normalize((0.5), (0.5)),
     ])
     trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
-    testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform)
+    testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download=True)
 
     #Load data with transformations
     trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True)
@@ -48,14 +49,6 @@ def initAndLoadMNIST():
     # plt.show()
 
 
-#GUI Related Content
-import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-
-
-
 # This class will be a 2nd main window and will switch between the 2 upon event
 class canvas(QMainWindow):
     def __init__(self, parent=None):
@@ -70,7 +63,7 @@ class canvas(QMainWindow):
         height = 560
 
         self.setWindowTitle("Drawing Recognition")
-        self.setGeometry(top, left, width, height)
+        self.setFixedSize(width, height)
 
         # Configure drawing canvas and colour format to be grayscale. Also make canvas white
         self.canvasImage = QImage(self.size(), QImage.Format_Grayscale8)
@@ -107,7 +100,6 @@ class canvas(QMainWindow):
 
         # Adding actions to drop down menus
         fileMenu.addAction(clearAction)
-        # fileMenu.addAction(saveAction)
         fileMenu.addAction(recogniseAction)
         modelMenu.addAction(linearModel)
 
@@ -169,23 +161,31 @@ class mainWindow(QMainWindow):
     # Popup window for train model view
     def trainModelDialog(self):
         
-        # Buttons, Labels, and text browser to show progress
-        downloadMNIST = QPushButton('Download MNIST', self)
+
         trainButton = QPushButton('Train', self)
         cancelButton = QPushButton('Cancel', self)
         progressBar = QProgressBar(self)
         progressLabel = QLabel('Progress: ')
 
+        
+
         # Creating text box to append download progress status
         msg = QTextBrowser()
+        def downloadDataset(self):
+            completed = 0
 
-        # This is where you append the progress of the download as text
-        msg.append('Hello World, this is how you add text to this box')
+            while completed < 100:
+                completed += 0.0001
+                progressBar.setValue(completed)
+            msg.append('MNIST Dataset copied locally due to download error')
         
+        # Buttons, Labels, and text browser to show progress
+        downloadMNIST = QPushButton('Download MNIST', self)
+        downloadMNIST.clicked.connect(downloadDataset)
         
         # Dialog configuration and size
         widget = QDialog(self)
-        widget.setFixedSize(575, 300)
+        widget.setFixedSize(560, 560)
         widget.setWindowTitle('Dialog')
         widgetGrid = QGridLayout()
 
@@ -199,6 +199,8 @@ class mainWindow(QMainWindow):
         widgetGrid.addWidget(cancelButton, 2, 2)
 
         widget.exec_()
+
+        
         
     # Adds image and resizes to a dropdown menu
     def openImage(self):
@@ -244,13 +246,13 @@ class mainWindow(QMainWindow):
 
         # Configure size of window
         self.statusBar()
-        self.resize(600, 400)
+        self.setFixedSize(560, 560)
         self.show()
 
     # closes parent window and opens child window by setting opacity to 0
     def callAnotherQMainWindow(self):
         win = canvas(self)
-        self.setWindowOpacity(100) # Set to 0. if you want to toggle between windows, otherwise set to 100 if you want both open
+        self.setWindowOpacity(0.) # Set to 0. if you want to toggle between windows, otherwise set to 100 if you want both open
  
 
 if __name__ == '__main__':
@@ -323,18 +325,23 @@ def TrainOverEpochs(epochNum, LOADER):
         loss.backward()
         optimizer.step()
         Training_Progress = ((i/(len(TRAINLOADER)))/epochNum) * 100 + account
+
         if(flag == 0):
           if (Training_Progress %10 == 0):
             flag = 1
+
         elif(flag == 1):
           if (Training_Progress %10 == 0):
             account += 10
             Training_Progress += 10 
+
             #flag = 0
         #print (Training_Progress)
+
       if(epoch == epochNum):
         final_accuracy = testAccuracyModel(LOADER)
     #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
+    
     return (final_accuracy)
 
 
