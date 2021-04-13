@@ -25,7 +25,108 @@ batch_size = 64
 learning_rate = 0.02
 device = 'cuda' if cuda.is_available() else 'cpu'
 
-def initAndLoadMNIST():
+
+
+
+
+#Note all methods below need to be adjusted for scope of variables and may need to be removed from methods
+
+
+
+#Linear Model
+class TestNet(nn.Module):
+  def __init__(self):
+    super(TestNet, self).__init__()
+    self.l1 = nn.Linear(784, 700)
+    self.l2 = nn.Linear(700, 350)
+    self.l3 = nn.Linear(350, 175)
+    self.l4 = nn.Linear(175, 85)
+    self.l5 = nn.Linear(85, 30)
+    self.l6 = nn.Linear(30, 15)
+    self.l7 = nn.Linear(15, 10)
+
+  def forward(self, x):
+    x = x.view(-1, 784)
+    x = F.relu(self.l1(x))
+    x = F.relu(self.l2(x))
+    x = F.relu(self.l3(x))
+    x = F.relu(self.l4(x))
+    x = F.relu(self.l5(x))
+    x = F.relu(self.l6(x))
+    x = self.l7(x)
+    return F.log_softmax(x)
+
+#
+
+model = TestNet()
+model.to(device)
+criterion = nn.NLLLoss()
+optimizer = optim.SGD(model.parameters(), lr = learning_rate, momentum = 0.5)
+
+def testAccuracyModel(LOADER):
+    model.eval()
+    Test_Correct = 0
+    Loader_size = len(LOADER.dataset)
+    for data, target in LOADER:
+        data, target = data.to(device), target.to(device)
+        output = model(data)
+        pred = output.data.max(1, keepdim=True)[1]
+        Test_Correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+    Accuracy = 100 * (Test_Correct/Loader_size)
+    return Accuracy
+
+def TrainOverEpochs(epochNum, LOADER):
+    final_accuracy = 0
+    Training_Progress = 0
+    account = 0
+    flag = 0
+    for epoch in range (1, epochNum + 1):
+        #print(epoch)
+      model.train()
+      for i, (data, target) in enumerate(TRAINLOADER):
+        data, target = data.to(device), target.to(device)
+        optimizer.zero_grad()
+        output = model(data)
+        loss = criterion(output, target)
+        loss.backward()
+        optimizer.step()
+        Training_Progress = ((i/(len(TRAINLOADER)))/epochNum) * 100 + account
+
+        if(flag == 0):
+          if (Training_Progress %10 == 0):
+            flag = 1
+
+        elif(flag == 1):
+          if (Training_Progress %10 == 0):
+            account += 10
+            Training_Progress += 10 
+
+            #flag = 0
+        #print (Training_Progress)
+
+      if(epoch == epochNum):
+        final_accuracy = testAccuracyModel(LOADER)
+    #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
+
+    return (final_accuracy)
+
+
+#Basic Code for Probability Graph
+#Need to Implement a way to get a list of probabilities
+
+def ShowProbabilityGraph(Loader):
+  data, target = next(iter(Loader))
+  img = data[0].view(1, 784)
+  ConvertedLogValue = torch.exp(model(img))
+  ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+  label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  plt.barh(label,ProbabilityList)
+  plt.title('Class Probability')
+  plt.ylabel('Number')
+  plt.xlabel('Probability')
+  plt.show()
+
+  def initAndLoadMNIST():
     datasetTransform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.5), (0.5)),
@@ -47,6 +148,14 @@ def initAndLoadMNIST():
 
     # plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
     # plt.show()
+
+
+
+
+
+################# GUI CONFIGURATIONS AND IMPLEMENTATIONS #################
+
+
 
 
 # This class will be a 2nd main window and will switch between the 2 upon event
@@ -177,7 +286,7 @@ class mainWindow(QMainWindow):
             while completed < 100:
                 completed += 0.0001
                 progressBar.setValue(completed)
-            msg.append('MNIST Dataset copied locally due to download error')
+            msg.append('Local MNIST Dataset used due to download error')
         
         # Buttons, Labels, and text browser to show progress
         downloadMNIST = QPushButton('Download MNIST', self)
@@ -260,102 +369,3 @@ if __name__ == '__main__':
 
     ex = mainWindow()
     sys.exit(app.exec_())
-
-
-
-#Note all methods below need to be adjusted for scope of variables and may need to be removed from methods
-
-
-
-#Linear Model
-class TestNet(nn.Module):
-  def __init__(self):
-    super(TestNet, self).__init__()
-    self.l1 = nn.Linear(784, 700)
-    self.l2 = nn.Linear(700, 350)
-    self.l3 = nn.Linear(350, 175)
-    self.l4 = nn.Linear(175, 85)
-    self.l5 = nn.Linear(85, 30)
-    self.l6 = nn.Linear(30, 15)
-    self.l7 = nn.Linear(15, 10)
-
-  def forward(self, x):
-    x = x.view(-1, 784)
-    x = F.relu(self.l1(x))
-    x = F.relu(self.l2(x))
-    x = F.relu(self.l3(x))
-    x = F.relu(self.l4(x))
-    x = F.relu(self.l5(x))
-    x = F.relu(self.l6(x))
-    x = self.l7(x)
-    return F.log_softmax(x)
-
-#
-
-model = TestNet()
-model.to(device)
-criterion = nn.NLLLoss()
-optimizer = optim.SGD(model.parameters(), lr = learning_rate, momentum = 0.5)
-
-def testAccuracyModel(LOADER):
-    model.eval()
-    Test_Correct = 0
-    Loader_size = len(LOADER.dataset)
-    for data, target in LOADER:
-        data, target = data.to(device), target.to(device)
-        output = model(data)
-        pred = output.data.max(1, keepdim=True)[1]
-        Test_Correct += pred.eq(target.data.view_as(pred)).cpu().sum()
-    Accuracy = 100 * (Test_Correct/Loader_size)
-    return Accuracy
-
-def TrainOverEpochs(epochNum, LOADER):
-    final_accuracy = 0
-    Training_Progress = 0
-    account = 0
-    flag = 0
-    for epoch in range (1, epochNum + 1):
-        #print(epoch)
-      model.train()
-      for i, (data, target) in enumerate(TRAINLOADER):
-        data, target = data.to(device), target.to(device)
-        optimizer.zero_grad()
-        output = model(data)
-        loss = criterion(output, target)
-        loss.backward()
-        optimizer.step()
-        Training_Progress = ((i/(len(TRAINLOADER)))/epochNum) * 100 + account
-
-        if(flag == 0):
-          if (Training_Progress %10 == 0):
-            flag = 1
-
-        elif(flag == 1):
-          if (Training_Progress %10 == 0):
-            account += 10
-            Training_Progress += 10 
-
-            #flag = 0
-        #print (Training_Progress)
-
-      if(epoch == epochNum):
-        final_accuracy = testAccuracyModel(LOADER)
-    #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
-    
-    return (final_accuracy)
-
-
-#Basic Code for Probability Graph
-#Need to Implement a way to get a list of probabilities
-
-def ShowProbabilityGraph(Loader):
-  data, target = next(iter(Loader))
-  img = data[0].view(1, 784)
-  ConvertedLogValue = torch.exp(model(img))
-  ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-  label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-  plt.barh(label,ProbabilityList)
-  plt.title('Class Probability')
-  plt.ylabel('Number')
-  plt.xlabel('Probability')
-  plt.show()
