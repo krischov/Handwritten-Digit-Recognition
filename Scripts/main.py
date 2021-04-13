@@ -19,15 +19,45 @@ from torch.utils import data
 import time
 
 
+
+
 #AI PARAMETERS
 epochNum = 10
 batch_size = 64
 learning_rate = 0.02
 device = 'cpu'
 
+<<<<<<< Updated upstream
 #Global Variable
 Current_Training_Progress = 0
 
+=======
+trans = transforms.Compose([transforms.ToTensor()])
+
+
+def initAndLoadMNIST():
+    datasetTransform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.5), (0.5)),
+    ])
+    trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
+    testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download=True)
+
+    #Load data with transformations
+    trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True)
+    testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
+
+
+    # Showing images
+
+    # dataiter = iter(trainLoader)
+    # images, labels = dataiter.next()
+
+    # im2display = images[1].numpy().squeeze()
+
+    # plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
+    # plt.show()
+>>>>>>> Stashed changes
 
 
 
@@ -243,11 +273,18 @@ class canvas(QMainWindow):
         
     # Save function for recognition
     def saveAndRecognise(self):
-        filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "PNG(*.png);;JPEG(*.jpg *.jpeg);; ALL Files(*.*)")
-        if filePath == "":
-            return
+        # filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "PNG(*.png);;JPEG(*.jpg *.jpeg);; ALL Files(*.*)")
+        # if filePath == "":
+        #     return
+
+        
         self.scaledImage = self.canvasImage.scaled(28, 28)
-        self.scaledImage.save(filePath)
+
+        self.scaledImage.save('Scripts\digitDrawn.png')
+
+        demo = trans(self.scaledImage)
+
+        print(self.scaledImage.shape())
 
     def clear(self):
         self.canvasImage.fill(Qt.white)
