@@ -104,15 +104,15 @@ def TrainOverEpochs(epochNum, LOADER):
     flag = 0
     for epoch in range (1, epochNum + 1):
         #print(epoch)
-      model.train()
-      for i, (data, target) in enumerate(TRAINLOADER):
-        data, target = data.to(device), target.to(device)
-        optimizer.zero_grad()
-        output = model(data)
-        loss = criterion(output, target)
-        loss.backward()
-        optimizer.step()
-        Training_Progress = ((i/(len(TRAINLOADER)))/epochNum) * 100 + account
+        model.train()
+        for i, (data, target) in enumerate(TRAINLOADER):
+            data, target = data.to(device), target.to(device)
+            optimizer.zero_grad()
+            output = model(data)
+            loss = criterion(output, target)
+            loss.backward()
+            optimizer.step()
+            Training_Progress = ((i/(len(TRAINLOADER)))/epochNum) * 100 + account
 
         if(flag == 0):
             if (Training_Progress %10 == 0):
@@ -270,8 +270,6 @@ class mainWindow(QMainWindow):
 
     # Popup window for train model view
     def trainModelDialog(self):
-        
-
         trainButton = QPushButton('Train', self)
         cancelButton = QPushButton('Cancel', self)
         progressBar = QProgressBar(self)
