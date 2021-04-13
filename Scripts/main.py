@@ -114,7 +114,6 @@ def TrainOverEpochs(epochNum, LOADER):
     flag = 0
     for epoch in range (1, epochNum + 1):
         #print(epoch)
-<<<<<<< Updated upstream
         model.train()
         for i, (data, target) in enumerate(TRAINLOADER):
             data, target = data.to(device), target.to(device)
@@ -125,21 +124,6 @@ def TrainOverEpochs(epochNum, LOADER):
             optimizer.step()
             Training_Progress = ((i/(len(TRAINLOADER)))/epochNum) * 100 + account
 
-=======
-      model.train()
-      for i, (data, target) in enumerate(trainLoader):
-        #Code that trains the model
-        data, target = data.to(device), target.to(device)
-        optimizer.zero_grad()
-        output = model(data)
-        loss = criterion(output, target)
-        loss.backward()
-        optimizer.step()
-        
-        #Code that keeps track of the training progress
-        Batch_Progress = (i/(len(trainLoader)))
-        Percentage_Progress = Batch_Progress * 100 
->>>>>>> Stashed changes
         if(flag == 0):
             if(Percentage_Progress == 0):
                 flag = 1
