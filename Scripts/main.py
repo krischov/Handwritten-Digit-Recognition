@@ -25,7 +25,7 @@ import time
 epochNum = 10
 batch_size = 64
 learning_rate = 0.02
-device = 'cuda' if cuda.is_available() else 'cpu'
+device = 'cpu' #'cuda' if cuda.is_available() else
 
 
 def initAndLoadMNIST():
