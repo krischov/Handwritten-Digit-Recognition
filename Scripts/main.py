@@ -25,7 +25,28 @@ batch_size = 64
 learning_rate = 0.02
 device = 'cuda' if cuda.is_available() else 'cpu'
 
+def initAndLoadMNIST():
+    datasetTransform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.5), (0.5)),
+])
+trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
+testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download=True)
 
+#Load data with transformations
+trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True)
+testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
+
+
+# Showing images
+
+# dataiter = iter(trainLoader)
+# images, labels = dataiter.next()
+
+# im2display = images[1].numpy().squeeze()
+
+# plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
+# plt.show()
 
 
 
@@ -126,28 +147,7 @@ def ShowProbabilityGraph(Loader):
   plt.xlabel('Probability')
   plt.show()
 
-  def initAndLoadMNIST():
-    datasetTransform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.5), (0.5)),
-    ])
-    trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
-    testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download=True)
 
-    #Load data with transformations
-    trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True)
-    testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
-
-
-    # Showing images
-
-    # dataiter = iter(trainLoader)
-    # images, labels = dataiter.next()
-
-    # im2display = images[1].numpy().squeeze()
-
-    # plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
-    # plt.show()
 
 
 
@@ -276,8 +276,6 @@ class mainWindow(QMainWindow):
         progressBar = QProgressBar(self)
         progressLabel = QLabel('Progress: ')
 
-        
-
         # Creating text box to append download progress status
         msg = QTextBrowser()
         def downloadDataset(self):
@@ -291,6 +289,7 @@ class mainWindow(QMainWindow):
         # Buttons, Labels, and text browser to show progress
         downloadMNIST = QPushButton('Download MNIST', self)
         downloadMNIST.clicked.connect(downloadDataset)
+        
         
         # Dialog configuration and size
         widget = QDialog(self)
