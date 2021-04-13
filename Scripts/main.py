@@ -101,10 +101,10 @@ def TrainOverEpochs(epochNum, LOADER):
             if(Percentage_Progress == 0):
                 account += 10
         Current_Training_Progress = Percentage_Progress*(1/epochNum) + account
-
-    #Code that Calculates Final Accuracy
-      if(epoch == epochNum):
-        final_accuracy = testAccuracyModel(LOADER)
+        
+        #Code that Calculates Final Accuracy
+        if(epoch == epochNum):
+            final_accuracy = testAccuracyModel(LOADER)
     #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
 
 
