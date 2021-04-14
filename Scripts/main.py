@@ -7,6 +7,7 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+import time
 
 #AI Content
 from torchvision.datasets import MNIST
@@ -16,12 +17,12 @@ import torchvision.models as models
 from torch import nn, optim, cuda
 import torch.nn.functional as F
 from torch.utils import data
-import time
+
 
 #AI PARAMETERS
-epochNum = 20
+epochNum = 1
 batch_size = 64
-learning_rate = 0.02
+learning_rate = 0.01
 device = 'cuda' if cuda.is_available() else 'cpu'
 
 #Global Variable
@@ -68,44 +69,6 @@ def testAccuracyModel(LOADER):
     return Accuracy
 
 
-# Trains the model over x amount of epochs (20 in this case)
-def TrainOverEpochs(epochNum, LOADER):
-    final_accuracy = 0
-    Percentage_Progress = 0
-    account = 0
-    flag = 0
-    for epoch in range (1, epochNum + 1):
-        model.train()
-        for i, (data, target) in enumerate(trainLoader):
-            #Code that trains the model
-            data, target = data.to(device), target.to(device)
-            optimizer.zero_grad()
-            output = model(data)
-            loss = criterion(output, target)
-            loss.backward()
-            optimizer.step()
-        
-            #Code that keeps track of the training progress
-            Batch_Progress = (i/(len(trainLoader)))
-            Percentage_Progress = Batch_Progress * 100 
-
-            if(flag == 0):
-                if(Percentage_Progress == 0):
-                    flag = 1
-
-            elif(flag == 1):
-                if(Percentage_Progress == 0):
-                    account += (100/(epochNum))
-            Current_Training_Progress = Percentage_Progress*(1/epochNum) + account
-            print(Current_Training_Progress)
-
-        #Code that Calculates Final Accuracy
-        if(epoch == epochNum):
-            final_accuracy = testAccuracyModel(LOADER)
-            print(final_accuracy)
-            #torch.save(model.state_dict(), 'C:/Users/krish/Desktop/KRISHEN AI FILES/SAVEDMODEL')
-
-
 #Basic Code for Probability Graph
 def ShowProbabilityGraph(Loader):
     data, target = next(iter(Loader))
@@ -146,15 +109,23 @@ testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffl
 recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
 Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
 
-TrainOverEpochs(epochNum, testLoader)
-ShowProbabilityGraph(Data)
+
+
+
+# TrainOverEpochs(epochNum, testLoader)
+
+# model = torch.load('model')
+# model.eval()
+
+
+# Shows probability of which number the digit is likely to be
+# ShowProbabilityGraph(Data)
 
 
 
 
 
 ################# GUI CONFIGURATIONS AND IMPLEMENTATIONS #################
-
 
 
 
@@ -257,7 +228,6 @@ class canvas(QMainWindow):
 
 
 
-
 # This class manages the main window and all the drop downs to train model and view images
 class mainWindow(QMainWindow):
 
@@ -273,6 +243,8 @@ class mainWindow(QMainWindow):
         progressBar = QProgressBar(self)
         progressLabel = QLabel('Progress: ')
 
+        
+
         # Creating text box to append download progress status
         msg = QTextBrowser()
         def downloadDataset(self):
@@ -282,10 +254,77 @@ class mainWindow(QMainWindow):
                 completed += 0.0001
                 progressBar.setValue(completed)
             msg.append('Local MNIST Dataset used due to download error')
+
+        # Reset progress bar back to 0
+        def resetProgressBar(self):
+            progressBar.setValue(0)
+
+
+        # Nested functions to train dataset, also iterates the progress bar
+        def trainDataset(self):
+            
+            
+            # Trains the model over x amount of epochs (20 in this case)
+            def TrainOverEpochs(epochNum, LOADER):
+
+                final_accuracy = 0
+                Percentage_Progress = 0
+                account = 0
+                flag = 0
+                msg.append("Training...")
+                for epoch in range (1, epochNum + 1):
+                    model.train()
+                    for i, (data, target) in enumerate(trainLoader):
+                        #Code that trains the model
+                        data, target = data.to(device), target.to(device)
+                        optimizer.zero_grad()
+                        output = model(data)
+                        loss = criterion(output, target)
+                        loss.backward()
+                        optimizer.step()
+                        
+
+                        # Ensuring calculations are not done too frequently
+                        if (i % 10 == 0):
+
+                            #Code that keeps track of the training progress
+                            Batch_Progress = (i/(len(trainLoader)))
+                            Percentage_Progress = Batch_Progress * 100 
+
+                            if(flag == 0):
+                                if(Percentage_Progress == 0):
+                                    flag = 1
+
+                            elif(flag == 1):
+                                if(Percentage_Progress == 0):
+                                    account += (100/(epochNum))
+                            Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
+                            print(Current_Training_Progress)
+
+                        # Append current status to progress bar
+                        global progress
+                        progress = int(Current_Training_Progress)
+                        progressBar.setValue(progress)
+
+                    #Code that Calculates Final Accuracy
+                    if(epoch == epochNum):
+                        progressBar.setValue(100)
+                        accuracy = round(float((testAccuracyModel(LOADER))), 2)
+                        finalAccuracy = round(float(accuracy), 2)
+                        print(finalAccuracy)
+
+                        msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
+
+                        
+                        # torch.save(model.state_dict(), 'model')
+
+            TrainOverEpochs(epochNum, testLoader)
         
         # Buttons, Labels, and text browser to show progress
         downloadMNIST = QPushButton('Download MNIST', self)
+        trainButton.clicked.connect(trainDataset)
         downloadMNIST.clicked.connect(downloadDataset)
+        cancelButton.clicked.connect(resetProgressBar)
         
         
         # Dialog configuration and size
