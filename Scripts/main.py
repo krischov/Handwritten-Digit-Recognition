@@ -317,8 +317,8 @@ class mainWindow(QMainWindow):
 
                         msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
 
-                        
-                        # torch.save(model.state_dict(), 'model')
+                        # Saves model so you don't need to retrain
+                        torch.save(model.state_dict(), 'model\model.pth')
 
             TrainOverEpochs(epochNum, testLoader)
         
