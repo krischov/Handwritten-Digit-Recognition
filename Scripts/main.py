@@ -225,11 +225,13 @@ class canvas(QMainWindow):
 
     # Changes to linear model
     def changeToLinearModel(self):
+        global model
         model = TestNet()
         self.statusBar.showMessage("Switched to Linear Model. Re-train required.")
 
     # Changes to convolutional model
     def changeToConvModel(self):
+        global model
         model = ConvNet()
         self.statusBar.showMessage("Switched to Convolutional Model. Re-train required.")
 
