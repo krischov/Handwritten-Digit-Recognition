@@ -304,7 +304,8 @@ class mainWindow(QMainWindow):
             while completed < 100:
                 completed += 0.0001
                 progressBar.setValue(completed)
-            msg.append('Local MNIST Dataset used due to download error')
+            msg.append('HTTP Error 503: Service Unavailable')
+            msg.append('Using local MNIST dataset')
 
         # Reset progress bar back to 0
         def resetProgressBar(self):
@@ -399,12 +400,19 @@ class mainWindow(QMainWindow):
         
     # Adds image and resizes to a dropdown menu
     def openImage(self):
-        image = QPixmap('Icons\MNIST.PNG')
-        pic = QLabel(self)
-        pic.resize(600, 400)
-        pic.setScaledContents(True)
-        pic.setPixmap(image)
-        pic.show()
+        dataiter = iter(trainLoader)
+        images, labels = dataiter.next()
+
+        im2display = images[1].numpy().squeeze().transpose((1,2,0))
+        plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
+        plt.show()
+
+        # image = QPixmap('Icons\MNIST.PNG')
+        # pic = QLabel(self)
+        # pic.resize(600, 400)
+        # pic.setScaledContents(True)
+        # pic.setPixmap(image)
+        # pic.show()
 
     def initUI(self):
         viewTrainingImages = QAction('View Training Images', self)
