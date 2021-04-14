@@ -164,6 +164,8 @@ class canvas(QMainWindow):
         self.parent = parent
         self.show()
 
+        
+
         # Window configurations
         top = 400
         left = 400
@@ -202,18 +204,35 @@ class canvas(QMainWindow):
         recogniseAction.setShortcut("Ctrl+R")
         recogniseAction.triggered.connect(self.saveAndRecognise)
 
+
+        self.statusBar = QStatusBar()
+        self.setStatusBar(self.statusBar)
+
+
         # Select Linear Model (Linear by default, so this dropdown is only for aesthetics)
         linearModel = QAction(QIcon("Icons\linearModel.png"), "Linear", self)
-        linearModel.triggered.connect(self.clear)
+        linearModel.triggered.connect(self.changeToLinearModel)
 
         convModel = QAction(QIcon("Icons\conv.png"), "Convolutional", self)
-        convModel.triggered.connect(self.clear)
+        convModel.triggered.connect(self.changeToConvModel)
+
 
         # Adding actions to drop down menus
         fileMenu.addAction(clearAction)
         fileMenu.addAction(recogniseAction)
         modelMenu.addAction(linearModel)
         modelMenu.addAction(convModel)
+
+    # Changes to linear model
+    def changeToLinearModel(self):
+        model = TestNet()
+        self.statusBar.showMessage("Switched to Linear Model. Re-train required.")
+
+    # Changes to convolutional model
+    def changeToConvModel(self):
+        model = ConvNet()
+        self.statusBar.showMessage("Switched to Convolutional Model. Re-train required.")
+
 
 
     # Close parent window
