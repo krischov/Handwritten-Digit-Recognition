@@ -24,6 +24,7 @@ epochNum = 10
 batch_size = 64
 learning_rate = 0.01
 device = 'cuda' if cuda.is_available() else 'cpu'
+flag = 0
 
 #Global Variable
 global Current_Training_Progress
@@ -71,59 +72,71 @@ class ConvNet(nn.Module):
     return F.log_softmax(x)
 
 # Neural network configuration and creation
-model = TestNet()
-model.to(device)
+model1 = TestNet()
+model1.to(device)
+model2 = ConvNet()
+model2.to(device)
 criterion = nn.NLLLoss()
-optimizer = optim.SGD(model.parameters(), lr = learning_rate, momentum = 0.5)
+optimizer1 = optim.SGD(model1.parameters(), lr = learning_rate, momentum = 0.5)
+optimizer2 = optim.SGD(model2.parameters(), lr = learning_rate, momentum = 0.5)
 
 
 # Tests for accuracy of the model and prints a percentage
 def testAccuracyModel(LOADER):
-    model.eval()
-    Test_Correct = 0
-    Loader_size = len(LOADER.dataset)
-    for data, target in LOADER:
-        data, target = data.to(device), target.to(device)
-        output = model(data)
-        pred = output.data.max(1, keepdim=True)[1]
-        Test_Correct += pred.eq(target.data.view_as(pred)).cpu().sum()
-    Accuracy = 100 * (Test_Correct/Loader_size)
-    return Accuracy
+    if(flag == 1):
+        model1.eval()
+        Test_Correct = 0
+        Loader_size = len(LOADER.dataset)
+        for data, target in LOADER:
+            data, target = data.to(device), target.to(device)
+            output = model1(data)
+            pred = output.data.max(1, keepdim=True)[1]
+            Test_Correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        Accuracy = 100 * (Test_Correct/Loader_size)
+        return Accuracy
+    elif(flag == 2):
+        model2.eval()
+        Test_Correct = 0
+        Loader_size = len(LOADER.dataset)
+        for data, target in LOADER:
+            data, target = data.to(device), target.to(device)
+            output = model2(data)
+            pred = output.data.max(1, keepdim=True)[1]
+            Test_Correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        Accuracy = 100 * (Test_Correct/Loader_size)
+        return Accuracy       
 
 
-# Probability graph when using Linear method
-def ShowProbabilityGraphLNN(Loader):
-  data, target = next(iter(Loader))
-  data, target = data.to(device), target.to(device)
-  img = data[0].view(1, 784)
-  ConvertedLogValue = torch.exp(model(img))
-  ConvertedLogValue = ConvertedLogValue.cpu()
-  ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-  PredictedNum = ProbabilityList.index(max(ProbabilityList))
-  label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-  plt.barh(label,ProbabilityList)
-  plt.title('The Predicted Number is: %i'  %PredictedNum)
-  plt.ylabel('Number')
-  plt.xlabel('Probability')
-  plt.show()
-  
-
-
-# Probability graph when using Convolutional method
-def ShowProbabilityGraphCNN(Loader):
-  data, target = next(iter(Loader))
-  data, target = data.to(device), target.to(device)
-  img = data[0].unsqueeze(0) #view(1, 784)
-  ConvertedLogValue = torch.exp(model(img))
-  ConvertedLogValue = ConvertedLogValue.cpu()
-  ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-  PredictedNum = ProbabilityList.index(max(ProbabilityList))
-  label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-  plt.barh(label,ProbabilityList)
-  plt.title('The Predicted Number is: %i'  %PredictedNum)
-  plt.ylabel('Number')
-  plt.xlabel('Probability')
-  plt.show()
+# Probability graph when using Linear or Convolutional method
+def ShowProbabilityGraph(Loader):
+  if(flag == 1): 
+    data, target = next(iter(Loader))
+    data, target = data.to(device), target.to(device)
+    img = data[0].view(1, 784)
+    ConvertedLogValue = torch.exp(model1(img))
+    ConvertedLogValue = ConvertedLogValue.cpu()
+    ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+    PredictedNum = ProbabilityList.index(max(ProbabilityList))
+    label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    plt.barh(label,ProbabilityList)
+    plt.title('The Predicted Number is: %i'  %PredictedNum)
+    plt.ylabel('Number')
+    plt.xlabel('Probability')
+    plt.show()
+  elif(flag == 2):
+    data, target = next(iter(Loader))
+    data, target = data.to(device), target.to(device)
+    img = data[0].unsqueeze(0) #view(1, 784)
+    ConvertedLogValue = torch.exp(model2(img))
+    ConvertedLogValue = ConvertedLogValue.cpu()
+    ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+    PredictedNum = ProbabilityList.index(max(ProbabilityList))
+    label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    plt.barh(label,ProbabilityList)
+    plt.title('The Predicted Number is: %i'  %PredictedNum)
+    plt.ylabel('Number')
+    plt.xlabel('Probability')
+    plt.show()
 
 
 #Transforms
@@ -187,7 +200,6 @@ class canvas(QMainWindow):
         # Menu bar setup
         mainMenu = self.menuBar()
         fileMenu = mainMenu.addMenu("File")
-        modelMenu = mainMenu.addMenu("Model")
         
         # # Save file in image format onto hard drive for analysis
         # saveAction = QAction(QIcon("Icons\save.png"), "Save", self)
@@ -208,33 +220,9 @@ class canvas(QMainWindow):
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)
 
-
-        # Select Linear Model (Linear by default, so this dropdown is only for aesthetics)
-        linearModel = QAction(QIcon("Icons\linearModel.png"), "Linear", self)
-        linearModel.triggered.connect(self.changeToLinearModel)
-
-        convModel = QAction(QIcon("Icons\conv.png"), "Convolutional", self)
-        convModel.triggered.connect(self.changeToConvModel)
-
-
         # Adding actions to drop down menus
         fileMenu.addAction(clearAction)
         fileMenu.addAction(recogniseAction)
-        modelMenu.addAction(linearModel)
-        modelMenu.addAction(convModel)
-
-    # Changes to linear model
-    def changeToLinearModel(self):
-        global model
-        model = TestNet()
-        self.statusBar.showMessage("Switched to Linear Model. Re-train required.")
-
-    # Changes to convolutional model
-    def changeToConvModel(self):
-        global model
-        model = ConvNet()
-        self.statusBar.showMessage("Switched to Convolutional Model. Re-train required.")
-
 
 
     # Close parent window
@@ -282,9 +270,12 @@ class canvas(QMainWindow):
         recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
         Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
 
-        loadModel = model.load_state_dict(torch.load('model\model.pth'))
+        if(flag == 1):
+            loadModel = model1.load_state_dict(torch.load('model\model.pth'))
+        elif(flag == 2):
+            loadModel = model2.load_state_dict(torch.load('model\model.pth'))
 
-        ShowProbabilityGraphLNN(Data)
+        ShowProbabilityGraph(Data)
         
 
 
@@ -306,10 +297,10 @@ class mainWindow(QMainWindow):
     def trainModelDialog(self):
         trainButton = QPushButton('Train', self)
         cancelButton = QPushButton('Cancel', self)
+        linearButton = QPushButton('Linear', self)
+        convButton = QPushButton('Convolutional', self)
         progressBar = QProgressBar(self)
         progressLabel = QLabel('Progress: ')
-
-        
 
         # Creating text box to append download progress status
         msg = QTextBrowser()
@@ -329,63 +320,92 @@ class mainWindow(QMainWindow):
 
         # Nested functions to train dataset, also iterates the progress bar
         def trainDataset(self):
-            
-            
-            # Trains the model over x amount of epochs (20 in this case)
-            def TrainOverEpochs(epochNum, LOADER):
-
+            # Trains the model over x amount of epochs (10 in this case)
+            def TrainOverEpochs(epochNum):
+                global progress
                 final_accuracy = 0
                 Percentage_Progress = 0
                 account = 0
-                flag = 0
-                msg.append("Training...")
-                for epoch in range (1, epochNum + 1):
-                    model.train()
-                    for i, (data, target) in enumerate(trainLoader):
-                        #Code that trains the model
-                        data, target = data.to(device), target.to(device)
-                        optimizer.zero_grad()
-                        output = model(data)
-                        loss = criterion(output, target)
-                        loss.backward()
-                        optimizer.step()
-                        
-
-                        # Ensuring calculations are not done too frequently
-                        if (i % 10 == 0):
-
-                            #Code that keeps track of the training progress
-                            Batch_Progress = (i/(len(trainLoader)))
-                            Percentage_Progress = Batch_Progress * 100 
-
-                            if(flag == 0):
-                                if(Percentage_Progress == 0):
-                                    flag = 1
-
-                            elif(flag == 1):
-                                if(Percentage_Progress == 0):
-                                    account += (100/(epochNum))
-                            Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
-                            print(Current_Training_Progress)
-
-                        # Append current status to progress bar
-                        global progress
-                        progress = int(Current_Training_Progress)
-                        progressBar.setValue(progress)
-
-                    #Code that Calculates Final Accuracy
+                flag_local = 0
+                if(flag == 0):
+                    msg.append("Model must be selected.")
+                    progressBar.setValue(100)
+                elif(flag == 1):
+                    msg.append("Training Linear Model...")
+                    for epoch in range (1, epochNum + 1):
+                        model1.train()
+                        for i, (data, target) in enumerate(trainLoader):
+                            #Code that trains the model
+                            data, target = data.to(device), target.to(device)
+                            optimizer1.zero_grad()
+                            output = model1(data)
+                            loss = criterion(output, target)
+                            loss.backward()
+                            optimizer1.step()
+                            # Ensuring calculations are not done too frequently
+                            if (i % 10 == 0):
+                                #Code that keeps track of the training progress
+                                Batch_Progress = (i/(len(trainLoader)))
+                                Percentage_Progress = Batch_Progress * 100
+                                if(flag_local == 0):
+                                    if(Percentage_Progress == 0):
+                                        flag_local = 1
+                                elif(flag_local == 1):
+                                    if(Percentage_Progress == 0):
+                                        account += (100/(epochNum))
+                                Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
+                                print(Current_Training_Progress)
+                            # Append current status to progress bar
+                            progress = int(Current_Training_Progress)
+                            progressBar.setValue(progress)
+                        #Code that Calculates Final Accuracy
                     if(epoch == epochNum):
                         progressBar.setValue(100)
-                        accuracy = round(float((testAccuracyModel(LOADER))), 2)
+                        accuracy = round(float((testAccuracyModel(testLoader))), 2)
                         finalAccuracy = round(float(accuracy), 2)
                         print(finalAccuracy)
-
                         msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
-
                         # Saves model so you don't need to retrain
-                        torch.save(model.state_dict(), 'model\model.pth')
+                        torch.save(model1.state_dict(), 'model\model.pth')
+                if(flag == 2):
+                    msg.append("Training Convolutional Model...")
+                    for epoch in range (1, epochNum + 1):
+                        model2.train()
+                        for i, (data, target) in enumerate(trainLoader):
+                            #Code that trains the model
+                            data, target = data.to(device), target.to(device)
+                            optimizer2.zero_grad()
+                            output = model2(data)
+                            loss = criterion(output, target)
+                            loss.backward()
+                            optimizer2.step()
+                            # Ensuring calculations are not done too frequently
+                            if (i % 10 == 0):
+                                #Code that keeps track of the training progress
+                                Batch_Progress = (i/(len(trainLoader)))
+                                Percentage_Progress = Batch_Progress * 100
+                                if(flag_local == 0):
+                                    if(Percentage_Progress == 0):
+                                        flag_local = 1
+                                elif(flag_local == 1):
+                                    if(Percentage_Progress == 0):
+                                        account += (100/(epochNum))
+                                Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
+                                print(Current_Training_Progress)
+                            # Append current status to progress bar
+                            progress = int(Current_Training_Progress)
+                            progressBar.setValue(progress)
+                        #Code that Calculates Final Accuracy
+                    if(epoch == epochNum):
+                        progressBar.setValue(100)
+                        accuracy = round(float((testAccuracyModel(testLoader))), 2)
+                        finalAccuracy = round(float(accuracy), 2)
+                        print(finalAccuracy)
+                        msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
+                        # Saves model so you don't need to retrain
+                        torch.save(model2.state_dict(), 'model\model.pth')
 
-            TrainOverEpochs(epochNum, testLoader)
+            TrainOverEpochs(epochNum)
         
         # Buttons, Labels, and text browser to show progress
         downloadMNIST = QPushButton('Download MNIST', self)
@@ -393,6 +413,22 @@ class mainWindow(QMainWindow):
         downloadMNIST.clicked.connect(downloadDataset)
         cancelButton.clicked.connect(resetProgressBar)
         
+        # Changes to linear model
+        def changeToLinearModel(self):
+            global flag
+            flag = 1
+            msg.append(("Switched to Linear Model. Re-train required."))
+
+        # Changes to convolutional model
+        def changeToConvModel(self):
+            global flag
+            flag = 2
+            msg.append(("Switched to Convolutional Model. Re-train required."))
+
+
+        linearButton.clicked.connect(changeToLinearModel)
+        convButton.clicked.connect(changeToConvModel)
+
         
         # Dialog configuration and size
         widget = QDialog(self)
@@ -408,6 +444,8 @@ class mainWindow(QMainWindow):
         widgetGrid.addWidget(downloadMNIST, 2, 0)
         widgetGrid.addWidget(trainButton, 2, 1)
         widgetGrid.addWidget(cancelButton, 2, 2)
+        widgetGrid.addWidget(linearButton, 2, 3)
+        widgetGrid.addWidget(convButton, 2, 4)
 
         widget.exec_()
 
