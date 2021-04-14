@@ -140,7 +140,7 @@ trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = da
 testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download = True)
 
 #Load data with transformations
-trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True, pin_memory = True, num_workers = 2)
+trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True, pin_memory = True, num_workers = 4)
 testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
 
 
@@ -238,7 +238,7 @@ class canvas(QMainWindow):
     def mouseMoveEvent(self, event):
         if (event.buttons() & Qt.LeftButton) & self.drawing:
             painter = QPainter(self.canvasImage)
-            painter.setPen(QPen(Qt.black, 55, Qt.SolidLine,
+            painter.setPen(QPen(Qt.black, 50, Qt.SolidLine,
             Qt.RoundCap, Qt.RoundJoin))
 
             painter.drawLine(self.lastPoint, event.pos())
