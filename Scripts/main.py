@@ -91,6 +91,7 @@ def testAccuracyModel(LOADER):
     return Accuracy
 
 
+# Probability graph when using Linear method
 def ShowProbabilityGraphLNN(Loader):
   data, target = next(iter(Loader))
   data, target = data.to(device), target.to(device)
@@ -105,7 +106,10 @@ def ShowProbabilityGraphLNN(Loader):
   plt.ylabel('Number')
   plt.xlabel('Probability')
   plt.show()
+  
 
+
+# Probability graph when using Convolutional method
 def ShowProbabilityGraphCNN(Loader):
   data, target = next(iter(Loader))
   data, target = data.to(device), target.to(device)
@@ -144,24 +148,12 @@ trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuf
 testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
 
 
-# Reading image file
-# recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
-# Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
-
-
-
-# model = torch.load('model')
-# model.eval()
-
-
-# Shows probability of which number the digit is likely to be
-# ShowProbabilityGraph(Data)
-
-
 
 
 
 ################# GUI CONFIGURATIONS AND IMPLEMENTATIONS #################
+
+
 
 
 
@@ -400,30 +392,47 @@ class mainWindow(QMainWindow):
 
         
         
-    # Adds image and resizes to a dropdown menu
-    def openImage(self):
+    # Adds testing images into sub plot
+    def openTestImages(self):
+        dataiter = iter(testLoader)
+        images, labels = dataiter.next()
+        imageCount = 64
+
+        for i in range(1, len(images)):
+            plt.figure('Testing images')
+            plt.subplot(8, 8, i)
+            im2display = images[i].numpy().squeeze()
+            plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
+            plt.axis('off')
+            plt.show()
+
+
+    # Displays training images on a plot       
+    def openTrainedImages(self):
         dataiter = iter(trainLoader)
         images, labels = dataiter.next()
+        imageCount = 64
 
-        im2display = images[1].numpy().squeeze().transpose((1,2,0))
-        plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
-        plt.show()
+        for i in range(1, len(images)):
+            plt.figure('Training images')
+            plt.subplot(8, 8, i)
+            im2display = images[i].numpy().squeeze()
+            plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
+            plt.axis('off')
+            plt.show()
 
-        # image = QPixmap('Icons\MNIST.PNG')
-        # pic = QLabel(self)
-        # pic.resize(600, 400)
-        # pic.setScaledContents(True)
-        # pic.setPixmap(image)
-        # pic.show()
 
     def initUI(self):
         viewTrainingImages = QAction('View Training Images', self)
-        viewTrainingImages.triggered.connect(self.callAnotherQMainWindow)
+        viewTrainingImages.triggered.connect(self.openTrainedImages)
+
+        drawingCanvas = QAction('Drawing Canvas', self)
+        drawingCanvas.triggered.connect(self.callAnotherQMainWindow)
 
         
         viewTestingImages = QAction('View Testing Images', self)
 
-        viewTestingImages.triggered.connect(self.openImage)
+        viewTestingImages.triggered.connect(self.openTestImages)
         self.setWindowIcon(QIcon('Icons\write.jpg'))
 
         # Model train GUI section dealing with button presses, new dialog, and progress bar
@@ -444,9 +453,11 @@ class mainWindow(QMainWindow):
 
 
         # File drop downs for training and testing image viewing
-        filemenu = menubar.addMenu('&View')
-        filemenu.addAction(viewTrainingImages)
-        filemenu.addAction(viewTestingImages)
+        viewMenu = menubar.addMenu('&View')
+        viewMenu.addAction(viewTrainingImages)
+        viewMenu.addAction(viewTestingImages)
+        viewMenu.addAction(drawingCanvas)
+
         self.setWindowTitle('Handwritten Digit Recogniser')
 
         # Configure size of window
