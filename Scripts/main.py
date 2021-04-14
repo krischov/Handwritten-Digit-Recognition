@@ -91,20 +91,33 @@ def testAccuracyModel(LOADER):
     return Accuracy
 
 
-#Basic Code for Probability Graph
-def ShowProbabilityGraph(Loader):
-    data, target = next(iter(Loader))
-    data, target = data.to(device), target.to(device)
-    img = data[0].view(1, 784)
-    ConvertedLogValue = torch.exp(model(img))
-    ConvertedLogValue = ConvertedLogValue.cpu()
-    ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-    label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-    plt.barh(label,ProbabilityList)
-    plt.title('Class Probability')
-    plt.ylabel('Number')
-    plt.xlabel('Probability')
-    plt.show()
+def ShowProbabilityGraphLNN(Loader):
+  data, target = next(iter(Loader))
+  data, target = data.to(device), target.to(device)
+  img = data[0].view(1, 784)
+  ConvertedLogValue = torch.exp(model(img))
+  ConvertedLogValue = ConvertedLogValue.cpu()
+  ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+  label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  plt.barh(label,ProbabilityList)
+  plt.title('Class Probability')
+  plt.ylabel('Number')
+  plt.xlabel('Probability')
+  plt.show()
+
+def ShowProbabilityGraphCNN(Loader):
+  data, target = next(iter(Loader))
+  data, target = data.to(device), target.to(device)
+  img = data[0].unsqueeze(0) #view(1, 784)
+  ConvertedLogValue = torch.exp(model(img))
+  ConvertedLogValue = ConvertedLogValue.cpu()
+  ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+  label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  plt.barh(label,ProbabilityList)
+  plt.title('Class Probability')
+  plt.ylabel('Number')
+  plt.xlabel('Probability')
+  plt.show()
 
 
 #Transforms
