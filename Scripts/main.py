@@ -297,8 +297,6 @@ class mainWindow(QMainWindow):
     def trainModelDialog(self):
         trainButton = QPushButton('Train', self)
         cancelButton = QPushButton('Cancel', self)
-        linearButton = QPushButton('Linear', self)
-        convButton = QPushButton('Convolutional', self)
         progressBar = QProgressBar(self)
         progressLabel = QLabel('Progress: ')
 
@@ -425,17 +423,38 @@ class mainWindow(QMainWindow):
             flag = 2
             msg.append(("Switched to Convolutional Model. Re-train required."))
 
-
-        linearButton.clicked.connect(changeToLinearModel)
-        convButton.clicked.connect(changeToConvModel)
+        
 
         
         # Dialog configuration and size
         widget = QDialog(self)
-        widget.setFixedSize(560, 560)
+        widget.resize(560, 600)
         widget.setWindowTitle('Dialog')
         widgetGrid = QGridLayout()
 
+        # Function which activates model depending on option chosen
+        def onActivated(modelIndex):
+            if (modelIndex == 1):
+                changeToLinearModel(self)
+            if (modelIndex == 2):
+                changeToConvModel(self)
+
+        # Defining drop down box for models
+        listOfModels = QComboBox(widget)
+        listOfModels.addItem('Select Model')
+        listOfModels.addItem('Linear')
+        listOfModels.addItem('Convolutional')
+
+        # Assigning index to variable which will be passed into the 
+        # onActivated function for index change
+        choice = listOfModels.currentText()
+
+        # Checks for index change, if changed, calls onActivated function
+        # with 'choice' as input
+        listOfModels.currentIndexChanged.connect(onActivated)
+        
+
+    
         # Grid layout for buttons
         widget.setLayout(widgetGrid)
         widgetGrid.addWidget(msg, 0, 0, 1, 4)
@@ -444,8 +463,7 @@ class mainWindow(QMainWindow):
         widgetGrid.addWidget(downloadMNIST, 2, 0)
         widgetGrid.addWidget(trainButton, 2, 1)
         widgetGrid.addWidget(cancelButton, 2, 2)
-        widgetGrid.addWidget(linearButton, 2, 3)
-        widgetGrid.addWidget(convButton, 2, 4)
+        widgetGrid.addWidget(listOfModels, 2, 4)
 
         widget.exec_()
 
@@ -482,6 +500,8 @@ class mainWindow(QMainWindow):
 
 
     def initUI(self):
+
+
         viewTrainingImages = QAction('View Training Images', self)
         viewTrainingImages.triggered.connect(self.openTrainedImages)
 
