@@ -20,7 +20,7 @@ from torch.utils import data
 
 
 #AI PARAMETERS
-epochNum = 1
+epochNum = 10
 batch_size = 64
 learning_rate = 0.01
 device = 'cuda' if cuda.is_available() else 'cpu'
@@ -138,18 +138,15 @@ trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = da
 testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download = True)
 
 #Load data with transformations
-trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True, pin_memory = True, num_workers = 5)
+trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True, pin_memory = True, num_workers = 2)
 testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
 
 
 # Reading image file
-recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
-Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
+# recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
+# Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
 
 
-
-
-# TrainOverEpochs(epochNum, testLoader)
 
 # model = torch.load('model')
 # model.eval()
@@ -215,10 +212,15 @@ class canvas(QMainWindow):
         linearModel = QAction(QIcon("Icons\linearModel.png"), "Linear", self)
         linearModel.triggered.connect(self.clear)
 
+        convModel = QAction(QIcon("Icons\conv.png"), "Convolutional", self)
+        convModel.triggered.connect(self.clear)
+
         # Adding actions to drop down menus
         fileMenu.addAction(clearAction)
         fileMenu.addAction(recogniseAction)
         modelMenu.addAction(linearModel)
+        modelMenu.addAction(convModel)
+
 
     # Close parent window
     def closeEvent(self, QCloseEvent):
@@ -256,10 +258,20 @@ class canvas(QMainWindow):
     def saveAndRecognise(self):
 
         # Uncomment if you want the output to be an inverted image
-        # self.canvasImage.invertPixels()
+        self.canvasImage.invertPixels()
         self.scaledImage = self.canvasImage.scaled(28, 28)
         
         self.scaledImage.save('Tests/Numbers/digitDrawn.png')
+        self.canvasImage.invertPixels()
+
+        recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
+        Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
+
+        loadModel = model.load_state_dict(torch.load('model\model.pth'))
+
+        ShowProbabilityGraphLNN(Data)
+        
+
 
     def clear(self):
         self.canvasImage.fill(Qt.white)
