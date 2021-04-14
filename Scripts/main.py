@@ -98,9 +98,10 @@ def ShowProbabilityGraphLNN(Loader):
   ConvertedLogValue = torch.exp(model(img))
   ConvertedLogValue = ConvertedLogValue.cpu()
   ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+  PredictedNum = ProbabilityList.index(max(ProbabilityList))
   label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
   plt.barh(label,ProbabilityList)
-  plt.title('Class Probability')
+  plt.title('The Predicted Number is: %i'  %PredictedNum)
   plt.ylabel('Number')
   plt.xlabel('Probability')
   plt.show()
@@ -112,9 +113,10 @@ def ShowProbabilityGraphCNN(Loader):
   ConvertedLogValue = torch.exp(model(img))
   ConvertedLogValue = ConvertedLogValue.cpu()
   ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+  PredictedNum = ProbabilityList.index(max(ProbabilityList))
   label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
   plt.barh(label,ProbabilityList)
-  plt.title('Class Probability')
+  plt.title('The Predicted Number is: %i'  %PredictedNum)
   plt.ylabel('Number')
   plt.xlabel('Probability')
   plt.show()
