@@ -138,7 +138,7 @@ trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = da
 testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download = True)
 
 #Load data with transformations
-trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True)
+trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True, pin_memory = True, num_workers = 5)
 testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
 
 
