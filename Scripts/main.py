@@ -28,17 +28,14 @@ device = 'cuda' if cuda.is_available() else 'cpu'
 #Global Variable
 global Current_Training_Progress
 
-
-
-
 #Linear Model
 class TestNet(nn.Module):
   def __init__(self):
     super(TestNet, self).__init__()
-    self.l1 = nn.Linear(784, 450)
-    self.l2 = nn.Linear(450, 250)
-    self.l3 = nn.Linear(250, 70)
-    self.l4 = nn.Linear(70, 10)
+    self.l1 = nn.Linear(784, 550)
+    self.l2 = nn.Linear(550, 358)
+    self.l3 = nn.Linear(358, 115)
+    self.l4 = nn.Linear(115, 10)
 
   def forward(self, x):
     x = x.view(-1, 784)
@@ -46,6 +43,31 @@ class TestNet(nn.Module):
     x = F.relu(self.l2(x))
     x = F.relu(self.l3(x))
     x = self.l4(x)
+    return F.log_softmax(x)
+  
+#Convolutional Model
+class ConvNet(nn.Module):
+  def __init__(self):
+    super(ConvNet, self).__init__()
+    self.conv1 = nn.Conv2d(in_channels = 1, out_channels = 28, kernel_size = 5, padding = 2)
+    self.conv2 = nn.Conv2d(in_channels = 28, out_channels = 156,  kernel_size = 3, padding = 1)
+    self.Pool = nn.MaxPool2d(2 , 2)
+    self.l1 = nn.Linear(156*7*7, 156)
+    self.l2 = nn.Linear(156 , 10)
+
+  def forward(self, x):
+    x = self.conv1(x)
+    x = F.relu(x)
+    x = self.Pool(x)
+
+    x = self.conv2(x)
+    x = F.relu(x)
+    x = self.Pool(x)
+
+    x = x.view(-1, 156*7*7)
+
+    x = F.relu(self.l1(x))
+    x = self.l2(x)
     return F.log_softmax(x)
 
 # Neural network configuration and creation
