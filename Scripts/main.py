@@ -199,7 +199,7 @@ class canvas(QMainWindow):
     def mouseMoveEvent(self, event):
         if (event.buttons() & Qt.LeftButton) & self.drawing:
             painter = QPainter(self.canvasImage)
-            painter.setPen(QPen(Qt.black, 40, Qt.SolidLine,
+            painter.setPen(QPen(Qt.black, 55, Qt.SolidLine,
             Qt.RoundCap, Qt.RoundJoin))
 
             painter.drawLine(self.lastPoint, event.pos())
@@ -219,10 +219,12 @@ class canvas(QMainWindow):
         
     # Save function for recognition
     def saveAndRecognise(self):
-        self.scaledImage = self.canvasImage.scaled(28, 28)
 
-        self.scaledImage.save('Scripts\digitDrawn.png')
-        print(self.scaledImage.shape())
+        # Uncomment if you want the output to be an inverted image
+        # self.canvasImage.invertPixels()
+        self.scaledImage = self.canvasImage.scaled(28, 28)
+        
+        self.scaledImage.save('Tests/Numbers/digitDrawn.png')
 
     def clear(self):
         self.canvasImage.fill(Qt.white)
