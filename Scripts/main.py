@@ -434,6 +434,9 @@ class mainWindow(QMainWindow):
 
         # Function which activates model depending on option chosen
         def onActivated(modelIndex):
+            if(modelIndex == 0):
+                global flag
+                flag = 0
             if (modelIndex == 1):
                 changeToLinearModel(self)
             if (modelIndex == 2):
