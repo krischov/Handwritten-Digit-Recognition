@@ -1,1 +1,37 @@
 -- Required Libraries & Version --
+
+Programming Language:
+Python Version 3.8
+
+Libraries:
+PyQt5 Version 5.15.4
+	> from PyQt5.QtWidgets import *
+	> from PyQt5.QtGui import *
+	> from PyQt5.QtCore import *
+	> import time
+	> import sys
+
+
+Matplotlib Version 3.4.1
+	> import matplotlib.pyplot as plt
+
+
+Torchvision Version 1.8.1
+	> import torch
+	> from torch import nn, optim, cuda
+	> from torchvision import datasets, transforms
+	> from torchvision.datasets import MNIST
+	> import torchvision.models as models
+	> import torch.nn.functional as F
+	> from torch.utils import data
+
+Numpy Version 1.20.2
+	> import numpy as np
+
+
+
+Editor:
+VSCode with Python extension or equivalent
+
+CMD:
+Miniconda Version 4.9.2
