@@ -28,6 +28,8 @@ flag = 0
 
 #Global Variable
 global Current_Training_Progress
+Current_Model_Index = 0
+
 
 #Linear Model
 class TestNet(nn.Module):
@@ -434,9 +436,12 @@ class mainWindow(QMainWindow):
 
         # Function which activates model depending on option chosen
         def onActivated(modelIndex):
+            global Current_Model_Index
+            Current_Model_Index = modelIndex
             if(modelIndex == 0):
                 global flag
                 flag = 0
+
             if (modelIndex == 1):
                 changeToLinearModel(self)
             if (modelIndex == 2):
@@ -447,7 +452,7 @@ class mainWindow(QMainWindow):
         listOfModels.addItem('Select Model')
         listOfModels.addItem('Linear')
         listOfModels.addItem('Convolutional')
-
+        listOfModels.setCurrentIndex(Current_Model_Index)
         # Assigning index to variable which will be passed into the 
         # onActivated function for index change
         choice = listOfModels.currentText()
