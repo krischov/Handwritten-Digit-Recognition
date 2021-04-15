@@ -365,6 +365,7 @@ class mainWindow(QMainWindow):
                         finalAccuracy = round(float(accuracy), 2)
                         print(finalAccuracy)
                         msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
+                        msg.append("Do not switch the model before leaving this window unless you intend to retrain.")
                         # Saves model so you don't need to retrain
                         torch.save(model1.state_dict(), 'model\model.pth')
                 if(flag == 2):
@@ -402,6 +403,7 @@ class mainWindow(QMainWindow):
                         finalAccuracy = round(float(accuracy), 2)
                         print(finalAccuracy)
                         msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
+                        msg.append("Do not switch the model before leaving this window unless you intend to retrain.")
                         # Saves model so you don't need to retrain
                         torch.save(model2.state_dict(), 'model\model.pth')
 
@@ -441,6 +443,7 @@ class mainWindow(QMainWindow):
             if(modelIndex == 0):
                 global flag
                 flag = 0
+                msg.append("Model must be selected.")
 
             if (modelIndex == 1):
                 changeToLinearModel(self)
