@@ -422,6 +422,7 @@ class mainWindow(QMainWindow):
             global flag
             flag = 2
             msg.append(("Switched to Convolutional Model. Re-train required."))
+            msg.append("Convoluitional Model: Do not attempt to train without a CUDA device.")
 
         
 
