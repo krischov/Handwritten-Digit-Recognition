@@ -22,7 +22,7 @@ from torch.utils import data
 #AI PARAMETERS
 epochNum = 10
 batch_size = 64
-learning_rate = 0.01
+learning_rate = 0.07
 device = 'cuda' if cuda.is_available() else 'cpu'
 flag = 0
 
@@ -35,17 +35,19 @@ Current_Model_Index = 0
 class TestNet(nn.Module):
   def __init__(self):
     super(TestNet, self).__init__()
-    self.l1 = nn.Linear(784, 550)
-    self.l2 = nn.Linear(550, 358)
-    self.l3 = nn.Linear(358, 115)
-    self.l4 = nn.Linear(115, 10)
+    self.l1 = nn.Linear(784, 576)
+    self.l2 = nn.Linear(576, 378)
+    self.l3 = nn.Linear(378, 256)
+    self.l4 = nn.Linear(256, 144)
+    self.l5 = nn.Linear(144, 10)
 
   def forward(self, x):
     x = x.view(-1, 784)
     x = F.relu(self.l1(x))
     x = F.relu(self.l2(x))
     x = F.relu(self.l3(x))
-    x = self.l4(x)
+    x = F.relu(self.l4(x))
+    x = self.l5(x)
     return F.log_softmax(x)
   
 #Convolutional Model
