@@ -1,6 +1,8 @@
 #Image Processing
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 #GUI Related Content
 import sys
@@ -17,6 +19,8 @@ import torchvision.models as models
 from torch import nn, optim, cuda
 import torch.nn.functional as F
 from torch.utils import data
+
+
 
 
 #AI PARAMETERS
@@ -481,8 +485,8 @@ class mainWindow(QMainWindow):
     def openTestImages(self):
         dataiter = iter(testLoader)
         images, labels = dataiter.next()
-        imageCount = 64
 
+    
         for i in range(1, len(images)):
             plt.figure('Testing images')
             plt.subplot(8, 8, i)
@@ -496,7 +500,6 @@ class mainWindow(QMainWindow):
     def openTrainedImages(self):
         dataiter = iter(trainLoader)
         images, labels = dataiter.next()
-        imageCount = 64
 
         for i in range(1, len(images)):
             plt.figure('Training images')
