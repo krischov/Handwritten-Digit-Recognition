@@ -354,7 +354,6 @@ class mainWindow(QMainWindow):
                                     if(Percentage_Progress == 0):
                                         account += (100/(epochNum))
                                 Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
-                                print(Current_Training_Progress)
                             # Append current status to progress bar
                             progress = int(Current_Training_Progress)
                             progressBar.setValue(progress)
@@ -363,7 +362,6 @@ class mainWindow(QMainWindow):
                         progressBar.setValue(100)
                         accuracy = round(float((testAccuracyModel(testLoader))), 2)
                         finalAccuracy = round(float(accuracy), 2)
-                        print(finalAccuracy)
                         msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
                         msg.append("Do not switch the model before leaving this window unless you intend to retrain.")
                         # Saves model so you don't need to retrain
@@ -392,7 +390,6 @@ class mainWindow(QMainWindow):
                                     if(Percentage_Progress == 0):
                                         account += (100/(epochNum))
                                 Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
-                                print(Current_Training_Progress)
                             # Append current status to progress bar
                             progress = int(Current_Training_Progress)
                             progressBar.setValue(progress)
@@ -401,7 +398,6 @@ class mainWindow(QMainWindow):
                         progressBar.setValue(100)
                         accuracy = round(float((testAccuracyModel(testLoader))), 2)
                         finalAccuracy = round(float(accuracy), 2)
-                        print(finalAccuracy)
                         msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
                         msg.append("Do not switch the model before leaving this window unless you intend to retrain.")
                         # Saves model so you don't need to retrain
