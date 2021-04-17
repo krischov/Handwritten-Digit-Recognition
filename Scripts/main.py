@@ -31,6 +31,11 @@ flag = 0
 #Global Variable
 global Current_Training_Progress
 Current_Model_Index = 0
+trainData = None
+testData = None
+trainLoader = None
+testLoader = None
+
 
 
 #Linear Model
@@ -115,34 +120,35 @@ def testAccuracyModel(LOADER):
 
 # Probability graph when using Linear or Convolutional method
 def ShowProbabilityGraph(Loader):
-  if(flag == 1): 
-    data, target = next(iter(Loader))
-    data, target = data.to(device), target.to(device)
-    img = data[0].view(1, 784)
-    ConvertedLogValue = torch.exp(model1(img))
-    ConvertedLogValue = ConvertedLogValue.cpu()
-    ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-    PredictedNum = ProbabilityList.index(max(ProbabilityList))
-    label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-    plt.barh(label,ProbabilityList)
-    plt.title('The Predicted Number is: %i'  %PredictedNum)
-    plt.ylabel('Number')
-    plt.xlabel('Probability')
-    plt.show()
-  elif(flag == 2):
-    data, target = next(iter(Loader))
-    data, target = data.to(device), target.to(device)
-    img = data[0].unsqueeze(0) #view(1, 784)
-    ConvertedLogValue = torch.exp(model2(img))
-    ConvertedLogValue = ConvertedLogValue.cpu()
-    ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-    PredictedNum = ProbabilityList.index(max(ProbabilityList))
-    label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-    plt.barh(label,ProbabilityList)
-    plt.title('The Predicted Number is: %i'  %PredictedNum)
-    plt.ylabel('Number')
-    plt.xlabel('Probability')
-    plt.show()
+    if(flag == 1): 
+        data, target = next(iter(Loader))
+        data, target = data.to(device), target.to(device)
+        img = data[0].view(1, 784)
+        ConvertedLogValue = torch.exp(model1(img))
+        ConvertedLogValue = ConvertedLogValue.cpu()
+        ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+        PredictedNum = ProbabilityList.index(max(ProbabilityList))
+        label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        plt.barh(label,ProbabilityList)
+        plt.title('The Predicted Number is: %i'  %PredictedNum)
+        plt.ylabel('Number')
+        plt.xlabel('Probability')
+        plt.show()
+    elif(flag == 2):
+        data, target = next(iter(Loader))
+        data, target = data.to(device), target.to(device)
+        img = data[0].unsqueeze(0) #view(1, 784)
+        ConvertedLogValue = torch.exp(model2(img))
+        ConvertedLogValue = ConvertedLogValue.cpu()
+        ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+        PredictedNum = ProbabilityList.index(max(ProbabilityList))
+        label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        plt.barh(label,ProbabilityList)
+        plt.title('The Predicted Number is: %i'  %PredictedNum)
+        plt.ylabel('Number')
+        plt.xlabel('Probability')
+        plt.show()
+
 
 
 #Transforms
@@ -159,12 +165,6 @@ datasetTransform2 = transforms.Compose([
 ])
 
 # Train and test data
-trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
-testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download = True)
-
-#Load data with transformations
-trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True, pin_memory = True, num_workers = 4)
-testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
 
 
 
@@ -310,12 +310,24 @@ class mainWindow(QMainWindow):
         msg = QTextBrowser()
         def downloadDataset(self):
             completed = 0
-
-            while completed < 100:
-                completed += 0.0001
-                progressBar.setValue(completed)
-            msg.append('HTTP Error 503: Service Unavailable')
-            msg.append('Using local MNIST dataset')
+            try: 
+                msg.append('Working...')
+                global trainData
+                trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
+                msg.append('Training Set Downloaded')
+                global testData
+                testData = datasets.MNIST(root = 'Data\TestData', train = False, transform = datasetTransform, download = True)
+                msg.append('Testing Set Downloaded')
+                global trainLoader
+                trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True, pin_memory = True, num_workers = 4)
+                global testLoader
+                testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
+                msg.append('Dataset Successfully Downloaded')
+                completed = 100
+            except: 
+                msg.append('HTTP Error 503: Service Unavailable')
+                msg.append('Please Locally Install MNIST Dataset into Data folder.')
+            progressBar.setValue(completed)
 
         # Reset progress bar back to 0
         def resetProgressBar(self):
