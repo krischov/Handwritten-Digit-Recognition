@@ -26,7 +26,7 @@ epochNum = 10
 batch_size = 64
 learning_rate = 0.07
 device = 'cuda' if cuda.is_available() else 'cpu'
-flag = 0
+
 
 #Global Variable
 global Current_Training_Progress
@@ -35,7 +35,8 @@ trainData = None
 testData = None
 trainLoader = None
 testLoader = None
-
+MNIST_DOWNLOADED = 0
+flag = 0
 
 
 #Linear Model
@@ -120,34 +121,41 @@ def testAccuracyModel(LOADER):
 
 # Probability graph when using Linear or Convolutional method
 def ShowProbabilityGraph(Loader):
-    if(flag == 1): 
-        data, target = next(iter(Loader))
-        data, target = data.to(device), target.to(device)
-        img = data[0].view(1, 784)
-        ConvertedLogValue = torch.exp(model1(img))
-        ConvertedLogValue = ConvertedLogValue.cpu()
-        ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-        PredictedNum = ProbabilityList.index(max(ProbabilityList))
-        label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-        plt.barh(label,ProbabilityList)
-        plt.title('The Predicted Number is: %i'  %PredictedNum)
-        plt.ylabel('Number')
-        plt.xlabel('Probability')
-        plt.show()
-    elif(flag == 2):
-        data, target = next(iter(Loader))
-        data, target = data.to(device), target.to(device)
-        img = data[0].unsqueeze(0) #view(1, 784)
-        ConvertedLogValue = torch.exp(model2(img))
-        ConvertedLogValue = ConvertedLogValue.cpu()
-        ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-        PredictedNum = ProbabilityList.index(max(ProbabilityList))
-        label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-        plt.barh(label,ProbabilityList)
-        plt.title('The Predicted Number is: %i'  %PredictedNum)
-        plt.ylabel('Number')
-        plt.xlabel('Probability')
-        plt.show()
+    if(MNIST_DOWNLOADED == 1):
+        if(flag == 1): 
+            data, target = next(iter(Loader))
+            data, target = data.to(device), target.to(device)
+            img = data[0].view(1, 784)
+            ConvertedLogValue = torch.exp(model1(img))
+            ConvertedLogValue = ConvertedLogValue.cpu()
+            ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+            PredictedNum = ProbabilityList.index(max(ProbabilityList))
+            label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+            plt.barh(label,ProbabilityList)
+            plt.title('The Predicted Number is: %i'  %PredictedNum)
+            plt.ylabel('Number')
+            plt.xlabel('Probability')
+            plt.show()
+        elif(flag == 2):
+            data, target = next(iter(Loader))
+            data, target = data.to(device), target.to(device)
+            img = data[0].unsqueeze(0) #view(1, 784)
+            ConvertedLogValue = torch.exp(model2(img))
+            ConvertedLogValue = ConvertedLogValue.cpu()
+            ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+            PredictedNum = ProbabilityList.index(max(ProbabilityList))
+            label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+            plt.barh(label,ProbabilityList)
+            plt.title('The Predicted Number is: %i'  %PredictedNum)
+            plt.ylabel('Number')
+            plt.xlabel('Probability')
+            plt.show()
+    elif(MNIST_DOWNLOADED == 0):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setWindowTitle("Error")
+        msg.setText("MNIST is not downloaded!")
+        x = msg.exec_()
 
 
 
@@ -310,7 +318,7 @@ class mainWindow(QMainWindow):
         msg = QTextBrowser()
         def downloadDataset(self):
             completed = 0
-            try: 
+            try:
                 msg.append('Working...')
                 global trainData
                 trainData = datasets.MNIST(root = 'Data\TrainData', train = True, transform = datasetTransform, download = True)
@@ -324,6 +332,8 @@ class mainWindow(QMainWindow):
                 testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
                 msg.append('Dataset Successfully Downloaded')
                 completed = 100
+                global MNIST_DOWNLOADED
+                MNIST_DOWNLOADED = 1
             except: 
                 msg.append('HTTP Error 503: Service Unavailable')
                 msg.append('Please Locally Install MNIST Dataset into Data folder.')
@@ -336,90 +346,97 @@ class mainWindow(QMainWindow):
 
         # Nested functions to train dataset, also iterates the progress bar
         def trainDataset(self):
-            # Trains the model over x amount of epochs (10 in this case)
-            def TrainOverEpochs(epochNum):
-                global progress
-                final_accuracy = 0
-                Percentage_Progress = 0
-                account = 0
-                flag_local = 0
-                if(flag == 0):
-                    msg.append("Model must be selected.")
-                    progressBar.setValue(100)
-                elif(flag == 1):
-                    msg.append("Training Linear Model...")
-                    for epoch in range (1, epochNum + 1):
-                        model1.train()
-                        for i, (data, target) in enumerate(trainLoader):
-                            #Code that trains the model
-                            data, target = data.to(device), target.to(device)
-                            optimizer1.zero_grad()
-                            output = model1(data)
-                            loss = criterion(output, target)
-                            loss.backward()
-                            optimizer1.step()
-                            # Ensuring calculations are not done too frequently
-                            if (i % 10 == 0):
-                                #Code that keeps track of the training progress
-                                Batch_Progress = (i/(len(trainLoader)))
-                                Percentage_Progress = Batch_Progress * 100
-                                if(flag_local == 0):
-                                    if(Percentage_Progress == 0):
-                                        flag_local = 1
-                                elif(flag_local == 1):
-                                    if(Percentage_Progress == 0):
-                                        account += (100/(epochNum))
-                                Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
-                            # Append current status to progress bar
-                            progress = int(Current_Training_Progress)
-                            progressBar.setValue(progress)
-                        #Code that Calculates Final Accuracy
-                    if(epoch == epochNum):
+            if(MNIST_DOWNLOADED == 1):
+                # Trains the model over x amount of epochs (10 in this case)
+                def TrainOverEpochs(epochNum):
+                    global progress
+                    final_accuracy = 0
+                    Percentage_Progress = 0
+                    account = 0
+                    flag_local = 0
+                    if(flag == 0):
+                        msg.append("Model must be selected.")
                         progressBar.setValue(100)
-                        accuracy = round(float((testAccuracyModel(testLoader))), 2)
-                        finalAccuracy = round(float(accuracy), 2)
-                        msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
-                        msg.append("Do not switch the model before leaving this window unless you intend to retrain.")
-                        # Saves model so you don't need to retrain
-                        torch.save(model1.state_dict(), 'model\model.pth')
-                if(flag == 2):
-                    msg.append("Training Convolutional Model...")
-                    for epoch in range (1, epochNum + 1):
-                        model2.train()
-                        for i, (data, target) in enumerate(trainLoader):
-                            #Code that trains the model
-                            data, target = data.to(device), target.to(device)
-                            optimizer2.zero_grad()
-                            output = model2(data)
-                            loss = criterion(output, target)
-                            loss.backward()
-                            optimizer2.step()
-                            # Ensuring calculations are not done too frequently
-                            if (i % 10 == 0):
-                                #Code that keeps track of the training progress
-                                Batch_Progress = (i/(len(trainLoader)))
-                                Percentage_Progress = Batch_Progress * 100
-                                if(flag_local == 0):
-                                    if(Percentage_Progress == 0):
-                                        flag_local = 1
-                                elif(flag_local == 1):
-                                    if(Percentage_Progress == 0):
-                                        account += (100/(epochNum))
-                                Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
-                            # Append current status to progress bar
-                            progress = int(Current_Training_Progress)
-                            progressBar.setValue(progress)
-                        #Code that Calculates Final Accuracy
-                    if(epoch == epochNum):
-                        progressBar.setValue(100)
-                        accuracy = round(float((testAccuracyModel(testLoader))), 2)
-                        finalAccuracy = round(float(accuracy), 2)
-                        msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
-                        msg.append("Do not switch the model before leaving this window unless you intend to retrain.")
-                        # Saves model so you don't need to retrain
-                        torch.save(model2.state_dict(), 'model\model.pth')
+                    elif(flag == 1):
+                        msg.append("Training Linear Model...")
+                        for epoch in range (1, epochNum + 1):
+                            model1.train()
+                            for i, (data, target) in enumerate(trainLoader):
+                                #Code that trains the model
+                                data, target = data.to(device), target.to(device)
+                                optimizer1.zero_grad()
+                                output = model1(data)
+                                loss = criterion(output, target)
+                                loss.backward()
+                                optimizer1.step()
+                                # Ensuring calculations are not done too frequently
+                                if (i % 10 == 0):
+                                    #Code that keeps track of the training progress
+                                    Batch_Progress = (i/(len(trainLoader)))
+                                    Percentage_Progress = Batch_Progress * 100
+                                    if(flag_local == 0):
+                                        if(Percentage_Progress == 0):
+                                            flag_local = 1
+                                    elif(flag_local == 1):
+                                        if(Percentage_Progress == 0):
+                                            account += (100/(epochNum))
+                                    Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
+                                # Append current status to progress bar
+                                progress = int(Current_Training_Progress)
+                                progressBar.setValue(progress)
+                            #Code that Calculates Final Accuracy
+                        if(epoch == epochNum):
+                            progressBar.setValue(100)
+                            accuracy = round(float((testAccuracyModel(testLoader))), 2)
+                            finalAccuracy = round(float(accuracy), 2)
+                            msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
+                            msg.append("Do not switch the model before leaving this window unless you intend to retrain.")
+                            # Saves model so you don't need to retrain
+                            torch.save(model1.state_dict(), 'model\model.pth')
+                    if(flag == 2):
+                        msg.append("Training Convolutional Model...")
+                        for epoch in range (1, epochNum + 1):
+                            model2.train()
+                            for i, (data, target) in enumerate(trainLoader):
+                                #Code that trains the model
+                                data, target = data.to(device), target.to(device)
+                                optimizer2.zero_grad()
+                                output = model2(data)
+                                loss = criterion(output, target)
+                                loss.backward()
+                                optimizer2.step()
+                                # Ensuring calculations are not done too frequently
+                                if (i % 10 == 0):
+                                    #Code that keeps track of the training progress
+                                    Batch_Progress = (i/(len(trainLoader)))
+                                    Percentage_Progress = Batch_Progress * 100
+                                    if(flag_local == 0):
+                                        if(Percentage_Progress == 0):
+                                            flag_local = 1
+                                    elif(flag_local == 1):
+                                        if(Percentage_Progress == 0):
+                                            account += (100/(epochNum))
+                                    Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
+                                # Append current status to progress bar
+                                progress = int(Current_Training_Progress)
+                                progressBar.setValue(progress)
+                            #Code that Calculates Final Accuracy
+                        if(epoch == epochNum):
+                            progressBar.setValue(100)
+                            accuracy = round(float((testAccuracyModel(testLoader))), 2)
+                            finalAccuracy = round(float(accuracy), 2)
+                            msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
+                            msg.append("Do not switch the model before leaving this window unless you intend to retrain.")
+                            # Saves model so you don't need to retrain
+                            torch.save(model2.state_dict(), 'model\model.pth')
 
-            TrainOverEpochs(epochNum)
+                TrainOverEpochs(epochNum)
+            elif(MNIST_DOWNLOADED == 0):
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Critical)
+                msg.setWindowTitle("Error")
+                msg.setText("MNIST is not downloaded!")
+                x = msg.exec_()
         
         # Buttons, Labels, and text browser to show progress
         downloadMNIST = QPushButton('Download MNIST', self)
@@ -495,64 +512,32 @@ class mainWindow(QMainWindow):
         
      # Adds testing images into sub plot
     def openTestImages(self):
-
-        # Global index to be used for next and previous batches
-        global imageIndex
-        imageIndex = 0
-
-        # Main window initialisation
-        testDialog = QMainWindow(self)
-        testDialog.resize(560, 600)
-        testDialog.setWindowTitle('MNIST Test Images')
-
-
-        wid = QWidget(self)
-        testDialog.setCentralWidget(wid)
-        testDialogLayout = QGridLayout(wid)
-        
-        nextButton = QPushButton('Next Page', self)
-        prevButton = QPushButton('Previous Page', self)
-        
-        
-
-        # Initial creation of the first page of test values
-        for i in range(1, 7):
-            
-            for j in range(1, 7):
-                image = testData[imageIndex][0]
-                
-                # Converts raw tensor to an ndarray and removes unecessary index
-                imageToDisplay = image.numpy().squeeze(0)
-                
-                # Convert floats generated in the ndarray to ints
-                imageToDisplay *= 255
-                imageToDisplay = imageToDisplay.astype(np.uint8)
-                
-                # Save image to hard disk and create a pixmap to store into a label on a grid
-                cv2.imwrite('image.png', imageToDisplay)
-                height, width = imageToDisplay.shape
-                newImage = QImage('image.png')
-                pixmap = QPixmap.fromImage(newImage)
-                pixmapImage = QPixmap(pixmap)
-                
-
-                label = QLabel()
-                label.setPixmap(pixmapImage)
-
-                
-                wid.setLayout(testDialogLayout)
-                testDialogLayout.addWidget(label, i, j)
-                imageIndex = imageIndex + 1
-
-
-
-        # Function to go to next 'page' of test values
-        def nextBatch(self):
+        if(MNIST_DOWNLOADED == 1):
+            # Global index to be used for next and previous batches
             global imageIndex
-            for i in range(1, 7):
-                for j in range(1, 7):
-                    image = testData[imageIndex + 36][0]
+            imageIndex = 0
 
+            # Main window initialisation
+            testDialog = QMainWindow(self)
+            testDialog.resize(560, 600)
+            testDialog.setWindowTitle('MNIST Test Images')
+
+
+            wid = QWidget(self)
+            testDialog.setCentralWidget(wid)
+            testDialogLayout = QGridLayout(wid)
+            
+            nextButton = QPushButton('Next Page', self)
+            prevButton = QPushButton('Previous Page', self)
+            
+            
+
+            # Initial creation of the first page of test values
+            for i in range(1, 7):
+                
+                for j in range(1, 7):
+                    image = testData[imageIndex][0]
+                    
                     # Converts raw tensor to an ndarray and removes unecessary index
                     imageToDisplay = image.numpy().squeeze(0)
                     
@@ -567,13 +552,6 @@ class mainWindow(QMainWindow):
                     pixmap = QPixmap.fromImage(newImage)
                     pixmapImage = QPixmap(pixmap)
                     
-
-                    label = QLabel()
-                    label.setPixmap(pixmapImage)
-
-                    
-                    wid.setLayout(testDialogLayout)
-                    testDialogLayout.addWidget(label, i, j)
 
                     label = QLabel()
                     label.setPixmap(pixmapImage)
@@ -584,111 +562,123 @@ class mainWindow(QMainWindow):
                     imageIndex = imageIndex + 1
 
 
-        # Function to go to previous 'page' of test values
-        def prevBatch(self):
-            global imageIndex
-            for i in range(1, 7):
-                for j in range(1, 7):
-                    image = testData[imageIndex - 36][0]
-                    
-                    # Converts raw tensor to an ndarray and removes unecessary index
-                    imageToDisplay = image.numpy().squeeze(0)
-                    
-                    # Convert floats generated in the ndarray to ints
-                    imageToDisplay *= 255
-                    imageToDisplay = imageToDisplay.astype(np.uint8)
-                    
-                    # Save image to hard disk and create a pixmap to store into a label on a grid
-                    cv2.imwrite('image.png', imageToDisplay)
-                    height, width = imageToDisplay.shape
-                    newImage = QImage('image.png')
-                    pixmap = QPixmap.fromImage(newImage)
-                    pixmapImage = QPixmap(pixmap)
-                    
+            # Function to go to next 'page' of test values
+            def nextBatch(self):
+                
+                global imageIndex
+                for i in range(1, 7):
+                    for j in range(1, 7):
+                        image = testData[imageIndex + 36][0]
 
-                    label = QLabel()
-                    label.setPixmap(pixmapImage)
+                        # Converts raw tensor to an ndarray and removes unecessary index
+                        imageToDisplay = image.numpy().squeeze(0)
+                        
+                        # Convert floats generated in the ndarray to ints
+                        imageToDisplay *= 255
+                        imageToDisplay = imageToDisplay.astype(np.uint8)
+                        
+                        # Save image to hard disk and create a pixmap to store into a label on a grid
+                        cv2.imwrite('image.png', imageToDisplay)
+                        height, width = imageToDisplay.shape
+                        newImage = QImage('image.png')
+                        pixmap = QPixmap.fromImage(newImage)
+                        pixmapImage = QPixmap(pixmap)
+                        
 
-                    
-                    wid.setLayout(testDialogLayout)
-                    testDialogLayout.addWidget(label, i, j)
+                        label = QLabel()
+                        label.setPixmap(pixmapImage)
 
-                    label = QLabel()
-                    label.setPixmap(pixmapImage)
+                        
+                        wid.setLayout(testDialogLayout)
+                        testDialogLayout.addWidget(label, i, j)
 
-                    # Reducing the index by 1 and setting layout
-                    wid.setLayout(testDialogLayout)
-                    testDialogLayout.addWidget(label, i, j)
-                    imageIndex = imageIndex - 1
+                        label = QLabel()
+                        label.setPixmap(pixmapImage)
 
-        nextButton.clicked.connect(nextBatch)
-        prevButton.clicked.connect(prevBatch)
+                        
+                        wid.setLayout(testDialogLayout)
+                        testDialogLayout.addWidget(label, i, j)
+                        imageIndex = imageIndex + 1
 
-        testDialogLayout.addWidget(prevButton, 8, 6)
-        testDialogLayout.addWidget(nextButton, 7, 6)
-        testDialog.show()
 
+            # Function to go to previous 'page' of test values
+            def prevBatch(self):
+                global imageIndex
+                for i in range(1, 7):
+                    for j in range(1, 7):
+                        image = testData[imageIndex - 36][0]
+                        
+                        # Converts raw tensor to an ndarray and removes unecessary index
+                        imageToDisplay = image.numpy().squeeze(0)
+                        
+                        # Convert floats generated in the ndarray to ints
+                        imageToDisplay *= 255
+                        imageToDisplay = imageToDisplay.astype(np.uint8)
+                        
+                        # Save image to hard disk and create a pixmap to store into a label on a grid
+                        cv2.imwrite('image.png', imageToDisplay)
+                        height, width = imageToDisplay.shape
+                        newImage = QImage('image.png')
+                        pixmap = QPixmap.fromImage(newImage)
+                        pixmapImage = QPixmap(pixmap)
+                        
+
+                        label = QLabel()
+                        label.setPixmap(pixmapImage)
+
+                        
+                        wid.setLayout(testDialogLayout)
+                        testDialogLayout.addWidget(label, i, j)
+
+                        label = QLabel()
+                        label.setPixmap(pixmapImage)
+
+                        # Reducing the index by 1 and setting layout
+                        wid.setLayout(testDialogLayout)
+                        testDialogLayout.addWidget(label, i, j)
+                        imageIndex = imageIndex - 1
+
+            nextButton.clicked.connect(nextBatch)
+            prevButton.clicked.connect(prevBatch)
+
+            testDialogLayout.addWidget(prevButton, 8, 6)
+            testDialogLayout.addWidget(nextButton, 7, 6)
+            testDialog.show()
+        elif(MNIST_DOWNLOADED == 0):
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowTitle("Error")
+            msg.setText("MNIST is not downloaded!")
+            x = msg.exec_()
 
     # Displays training images on a plot       
     def openTrainedImages(self):
-
-        # Global index to be used for next and previous batches
-        global imageIndex
-        imageIndex = 0
-
-        # Main window initialisation
-        trainDialog = QMainWindow(self)
-        trainDialog.resize(560, 600)
-        trainDialog.setWindowTitle('MNIST Train Images')
-
-
-        wid = QWidget(self)
-        trainDialog.setCentralWidget(wid)
-        trainDialogLayout = QGridLayout(wid)
-        
-        nextButton = QPushButton('Next Page', self)
-        prevButton = QPushButton('Previous Page', self)
-        
-        
-
-        # Initial creation of the first page of test values
-        for i in range(1, 7):
-            
-            for j in range(1, 7):
-                image = trainData[imageIndex][0]
-                
-                # Converts raw tensor to an ndarray and removes unecessary index
-                imageToDisplay = image.numpy().squeeze(0)
-                
-                # Convert floats generated in the ndarray to ints
-                imageToDisplay *= 255
-                imageToDisplay = imageToDisplay.astype(np.uint8)
-                
-                # Save image to hard disk and create a pixmap to store into a label on a grid
-                cv2.imwrite('image.png', imageToDisplay)
-                height, width = imageToDisplay.shape
-                newImage = QImage('image.png')
-                pixmap = QPixmap.fromImage(newImage)
-                pixmapImage = QPixmap(pixmap)
-                
-
-                label = QLabel()
-                label.setPixmap(pixmapImage)
-
-                
-                wid.setLayout(trainDialogLayout)
-                trainDialogLayout.addWidget(label, i, j)
-                imageIndex = imageIndex + 1
-
-
-
-        # Function to go to next 'page' of test values
-        def nextBatch(self):
+        if(MNIST_DOWNLOADED == 1):
+            # Global index to be used for next and previous batches
             global imageIndex
-            for i in range(1, 7):
-                for j in range(1, 7):
-                    image = trainData[imageIndex + 36][0]
+            imageIndex = 0
 
+            # Main window initialisation
+            trainDialog = QMainWindow(self)
+            trainDialog.resize(560, 600)
+            trainDialog.setWindowTitle('MNIST Train Images')
+
+
+            wid = QWidget(self)
+            trainDialog.setCentralWidget(wid)
+            trainDialogLayout = QGridLayout(wid)
+            
+            nextButton = QPushButton('Next Page', self)
+            prevButton = QPushButton('Previous Page', self)
+            
+            
+
+            # Initial creation of the first page of test values
+            for i in range(1, 7):
+                
+                for j in range(1, 7):
+                    image = trainData[imageIndex][0]
+                    
                     # Converts raw tensor to an ndarray and removes unecessary index
                     imageToDisplay = image.numpy().squeeze(0)
                     
@@ -703,13 +693,6 @@ class mainWindow(QMainWindow):
                     pixmap = QPixmap.fromImage(newImage)
                     pixmapImage = QPixmap(pixmap)
                     
-
-                    label = QLabel()
-                    label.setPixmap(pixmapImage)
-
-                    
-                    wid.setLayout(trainDialogLayout)
-                    trainDialogLayout.addWidget(label, i, j)
 
                     label = QLabel()
                     label.setPixmap(pixmapImage)
@@ -720,49 +703,95 @@ class mainWindow(QMainWindow):
                     imageIndex = imageIndex + 1
 
 
-        # Function to go to previous 'page' of test values
-        def prevBatch(self):
-            global imageIndex
-            for i in range(1, 7):
-                for j in range(1, 7):
-                    image = testData[imageIndex - 36][0]
-                    
-                    # Converts raw tensor to an ndarray and removes unecessary index
-                    imageToDisplay = image.numpy().squeeze(0)
-                    
-                    # Convert floats generated in the ndarray to ints
-                    imageToDisplay *= 255
-                    imageToDisplay = imageToDisplay.astype(np.uint8)
-                    
-                    # Save image to hard disk and create a pixmap to store into a label on a grid
-                    cv2.imwrite('image.png', imageToDisplay)
-                    height, width = imageToDisplay.shape
-                    newImage = QImage('image.png')
-                    pixmap = QPixmap.fromImage(newImage)
-                    pixmapImage = QPixmap(pixmap)
-                    
 
-                    label = QLabel()
-                    label.setPixmap(pixmapImage)
+            # Function to go to next 'page' of test values
+            def nextBatch(self):
+                global imageIndex
+                for i in range(1, 7):
+                    for j in range(1, 7):
+                        image = trainData[imageIndex + 36][0]
 
-                    
-                    wid.setLayout(trainDialogLayout)
-                    trainDialogLayout.addWidget(label, i, j)
+                        # Converts raw tensor to an ndarray and removes unecessary index
+                        imageToDisplay = image.numpy().squeeze(0)
+                        
+                        # Convert floats generated in the ndarray to ints
+                        imageToDisplay *= 255
+                        imageToDisplay = imageToDisplay.astype(np.uint8)
+                        
+                        # Save image to hard disk and create a pixmap to store into a label on a grid
+                        cv2.imwrite('image.png', imageToDisplay)
+                        height, width = imageToDisplay.shape
+                        newImage = QImage('image.png')
+                        pixmap = QPixmap.fromImage(newImage)
+                        pixmapImage = QPixmap(pixmap)
+                        
 
-                    label = QLabel()
-                    label.setPixmap(pixmapImage)
+                        label = QLabel()
+                        label.setPixmap(pixmapImage)
 
-                    # Reducing the index by 1 and setting layout
-                    wid.setLayout(trainDialogLayout)
-                    trainDialogLayout.addWidget(label, i, j)
-                    imageIndex = imageIndex - 1
+                        
+                        wid.setLayout(trainDialogLayout)
+                        trainDialogLayout.addWidget(label, i, j)
 
-        nextButton.clicked.connect(nextBatch)
-        prevButton.clicked.connect(prevBatch)
+                        label = QLabel()
+                        label.setPixmap(pixmapImage)
 
-        trainDialogLayout.addWidget(prevButton, 8, 6)
-        trainDialogLayout.addWidget(nextButton, 7, 6)
-        trainDialog.show()
+                        
+                        wid.setLayout(trainDialogLayout)
+                        trainDialogLayout.addWidget(label, i, j)
+                        imageIndex = imageIndex + 1
+
+
+            # Function to go to previous 'page' of test values
+            def prevBatch(self):
+                global imageIndex
+                for i in range(1, 7):
+                    for j in range(1, 7):
+                        image = testData[imageIndex - 36][0]
+                        
+                        # Converts raw tensor to an ndarray and removes unecessary index
+                        imageToDisplay = image.numpy().squeeze(0)
+                        
+                        # Convert floats generated in the ndarray to ints
+                        imageToDisplay *= 255
+                        imageToDisplay = imageToDisplay.astype(np.uint8)
+                        
+                        # Save image to hard disk and create a pixmap to store into a label on a grid
+                        cv2.imwrite('image.png', imageToDisplay)
+                        height, width = imageToDisplay.shape
+                        newImage = QImage('image.png')
+                        pixmap = QPixmap.fromImage(newImage)
+                        pixmapImage = QPixmap(pixmap)
+                        
+
+                        label = QLabel()
+                        label.setPixmap(pixmapImage)
+
+                        
+                        wid.setLayout(trainDialogLayout)
+                        trainDialogLayout.addWidget(label, i, j)
+
+                        label = QLabel()
+                        label.setPixmap(pixmapImage)
+
+                        # Reducing the index by 1 and setting layout
+                        wid.setLayout(trainDialogLayout)
+                        trainDialogLayout.addWidget(label, i, j)
+                        imageIndex = imageIndex - 1
+
+            nextButton.clicked.connect(nextBatch)
+            prevButton.clicked.connect(prevBatch)
+
+            trainDialogLayout.addWidget(prevButton, 8, 6)
+            trainDialogLayout.addWidget(nextButton, 7, 6)
+            trainDialog.show()
+        elif(MNIST_DOWNLOADED == 0):
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowTitle("Error")
+            msg.setText("MNIST is not downloaded!")
+            x = msg.exec_()
+
 
 
     def initUI(self):
