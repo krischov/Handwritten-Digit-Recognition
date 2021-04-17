@@ -1,8 +1,7 @@
 #Image Processing
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import cv2
 
 #GUI Related Content
 import sys
@@ -19,7 +18,6 @@ import torchvision.models as models
 from torch import nn, optim, cuda
 import torch.nn.functional as F
 from torch.utils import data
-
 
 
 
@@ -483,33 +481,276 @@ class mainWindow(QMainWindow):
 
         
         
-    # Adds testing images into sub plot
+     # Adds testing images into sub plot
     def openTestImages(self):
-        dataiter = iter(testLoader)
-        images, labels = dataiter.next()
 
-    
-        for i in range(1, len(images)):
-            plt.figure('Testing images')
-            plt.subplot(8, 8, i)
-            im2display = images[i].numpy().squeeze()
-            plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
-            plt.axis('off')
-            plt.show()
+        # Global index to be used for next and previous batches
+        global imageIndex
+        imageIndex = 0
+
+        # Main window initialisation
+        testDialog = QMainWindow(self)
+        testDialog.resize(560, 600)
+        testDialog.setWindowTitle('IMAGES')
+
+
+        wid = QWidget(self)
+        testDialog.setCentralWidget(wid)
+        testDialogLayout = QGridLayout(wid)
+        
+        nextButton = QPushButton('Next batch', self)
+        prevButton = QPushButton('Previous batch', self)
+        
+        
+
+        # Initial creation of the first page of test values
+        for i in range(1, 7):
+            
+            for j in range(1, 7):
+                image = testData[imageIndex][0]
+                
+                # Converts raw tensor to an ndarray and removes unecessary index
+                imageToDisplay = image.numpy().squeeze(0)
+                
+                # Convert floats generated in the ndarray to ints
+                imageToDisplay *= 255
+                imageToDisplay = imageToDisplay.astype(np.uint8)
+                
+                # Save image to hard disk and create a pixmap to store into a label on a grid
+                cv2.imwrite('image.png', imageToDisplay)
+                height, width = imageToDisplay.shape
+                newImage = QImage('image.png')
+                pixmap = QPixmap.fromImage(newImage)
+                pixmapImage = QPixmap(pixmap)
+                
+
+                label = QLabel()
+                label.setPixmap(pixmapImage)
+
+                
+                wid.setLayout(testDialogLayout)
+                testDialogLayout.addWidget(label, i, j)
+                imageIndex = imageIndex + 1
+
+
+
+        # Function to go to next 'page' of test values
+        def nextBatch(self):
+            global imageIndex
+            for i in range(1, 7):
+                for j in range(1, 7):
+                    image = testData[imageIndex + 36][0]
+
+                    # Converts raw tensor to an ndarray and removes unecessary index
+                    imageToDisplay = image.numpy().squeeze(0)
+                    
+                    # Convert floats generated in the ndarray to ints
+                    imageToDisplay *= 255
+                    imageToDisplay = imageToDisplay.astype(np.uint8)
+                    
+                    # Save image to hard disk and create a pixmap to store into a label on a grid
+                    cv2.imwrite('image.png', imageToDisplay)
+                    height, width = imageToDisplay.shape
+                    newImage = QImage('image.png')
+                    pixmap = QPixmap.fromImage(newImage)
+                    pixmapImage = QPixmap(pixmap)
+                    
+
+                    label = QLabel()
+                    label.setPixmap(pixmapImage)
+
+                    
+                    wid.setLayout(testDialogLayout)
+                    testDialogLayout.addWidget(label, i, j)
+
+                    label = QLabel()
+                    label.setPixmap(pixmapImage)
+
+                    
+                    wid.setLayout(testDialogLayout)
+                    testDialogLayout.addWidget(label, i, j)
+                    imageIndex = imageIndex + 1
+
+
+        # Function to go to previous 'page' of test values
+        def prevBatch(self):
+            global imageIndex
+            for i in range(1, 7):
+                for j in range(1, 7):
+                    image = testData[imageIndex - 36][0]
+                    
+                    # Converts raw tensor to an ndarray and removes unecessary index
+                    imageToDisplay = image.numpy().squeeze(0)
+                    
+                    # Convert floats generated in the ndarray to ints
+                    imageToDisplay *= 255
+                    imageToDisplay = imageToDisplay.astype(np.uint8)
+                    
+                    # Save image to hard disk and create a pixmap to store into a label on a grid
+                    cv2.imwrite('image.png', imageToDisplay)
+                    height, width = imageToDisplay.shape
+                    newImage = QImage('image.png')
+                    pixmap = QPixmap.fromImage(newImage)
+                    pixmapImage = QPixmap(pixmap)
+                    
+
+                    label = QLabel()
+                    label.setPixmap(pixmapImage)
+
+                    
+                    wid.setLayout(testDialogLayout)
+                    testDialogLayout.addWidget(label, i, j)
+
+                    label = QLabel()
+                    label.setPixmap(pixmapImage)
+
+                    # Reducing the index by 1 and setting layout
+                    wid.setLayout(testDialogLayout)
+                    testDialogLayout.addWidget(label, i, j)
+                    imageIndex = imageIndex - 1
+
+        nextButton.clicked.connect(nextBatch)
+        prevButton.clicked.connect(prevBatch)
+
+        testDialogLayout.addWidget(prevButton, 8, 6)
+        testDialogLayout.addWidget(nextButton, 7, 6)
+        testDialog.show()
 
 
     # Displays training images on a plot       
     def openTrainedImages(self):
-        dataiter = iter(trainLoader)
-        images, labels = dataiter.next()
 
-        for i in range(1, len(images)):
-            plt.figure('Training images')
-            plt.subplot(8, 8, i)
-            im2display = images[i].numpy().squeeze()
-            plt.imshow(im2display, interpolation='nearest', cmap='gray_r')
-            plt.axis('off')
-            plt.show()
+        # Global index to be used for next and previous batches
+        global imageIndex
+        imageIndex = 0
+
+        # Main window initialisation
+        trainDialog = QMainWindow(self)
+        trainDialog.resize(560, 600)
+        trainDialog.setWindowTitle('IMAGES')
+
+
+        wid = QWidget(self)
+        trainDialog.setCentralWidget(wid)
+        trainDialogLayout = QGridLayout(wid)
+        
+        nextButton = QPushButton('Next batch', self)
+        prevButton = QPushButton('Previous batch', self)
+        
+        
+
+        # Initial creation of the first page of test values
+        for i in range(1, 7):
+            
+            for j in range(1, 7):
+                image = trainData[imageIndex][0]
+                
+                # Converts raw tensor to an ndarray and removes unecessary index
+                imageToDisplay = image.numpy().squeeze(0)
+                
+                # Convert floats generated in the ndarray to ints
+                imageToDisplay *= 255
+                imageToDisplay = imageToDisplay.astype(np.uint8)
+                
+                # Save image to hard disk and create a pixmap to store into a label on a grid
+                cv2.imwrite('image.png', imageToDisplay)
+                height, width = imageToDisplay.shape
+                newImage = QImage('image.png')
+                pixmap = QPixmap.fromImage(newImage)
+                pixmapImage = QPixmap(pixmap)
+                
+
+                label = QLabel()
+                label.setPixmap(pixmapImage)
+
+                
+                wid.setLayout(trainDialogLayout)
+                trainDialogLayout.addWidget(label, i, j)
+                imageIndex = imageIndex + 1
+
+
+
+        # Function to go to next 'page' of test values
+        def nextBatch(self):
+            global imageIndex
+            for i in range(1, 7):
+                for j in range(1, 7):
+                    image = trainData[imageIndex + 36][0]
+
+                    # Converts raw tensor to an ndarray and removes unecessary index
+                    imageToDisplay = image.numpy().squeeze(0)
+                    
+                    # Convert floats generated in the ndarray to ints
+                    imageToDisplay *= 255
+                    imageToDisplay = imageToDisplay.astype(np.uint8)
+                    
+                    # Save image to hard disk and create a pixmap to store into a label on a grid
+                    cv2.imwrite('image.png', imageToDisplay)
+                    height, width = imageToDisplay.shape
+                    newImage = QImage('image.png')
+                    pixmap = QPixmap.fromImage(newImage)
+                    pixmapImage = QPixmap(pixmap)
+                    
+
+                    label = QLabel()
+                    label.setPixmap(pixmapImage)
+
+                    
+                    wid.setLayout(trainDialogLayout)
+                    trainDialogLayout.addWidget(label, i, j)
+
+                    label = QLabel()
+                    label.setPixmap(pixmapImage)
+
+                    
+                    wid.setLayout(trainDialogLayout)
+                    trainDialogLayout.addWidget(label, i, j)
+                    imageIndex = imageIndex + 1
+
+
+        # Function to go to previous 'page' of test values
+        def prevBatch(self):
+            global imageIndex
+            for i in range(1, 7):
+                for j in range(1, 7):
+                    image = testData[imageIndex - 36][0]
+                    
+                    # Converts raw tensor to an ndarray and removes unecessary index
+                    imageToDisplay = image.numpy().squeeze(0)
+                    
+                    # Convert floats generated in the ndarray to ints
+                    imageToDisplay *= 255
+                    imageToDisplay = imageToDisplay.astype(np.uint8)
+                    
+                    # Save image to hard disk and create a pixmap to store into a label on a grid
+                    cv2.imwrite('image.png', imageToDisplay)
+                    height, width = imageToDisplay.shape
+                    newImage = QImage('image.png')
+                    pixmap = QPixmap.fromImage(newImage)
+                    pixmapImage = QPixmap(pixmap)
+                    
+
+                    label = QLabel()
+                    label.setPixmap(pixmapImage)
+
+                    
+                    wid.setLayout(trainDialogLayout)
+                    trainDialogLayout.addWidget(label, i, j)
+
+                    label = QLabel()
+                    label.setPixmap(pixmapImage)
+
+                    # Reducing the index by 1 and setting layout
+                    wid.setLayout(trainDialogLayout)
+                    trainDialogLayout.addWidget(label, i, j)
+                    imageIndex = imageIndex - 1
+
+        nextButton.clicked.connect(nextBatch)
+        prevButton.clicked.connect(prevBatch)
+
+        trainDialogLayout.addWidget(prevButton, 8, 6)
+        trainDialogLayout.addWidget(nextButton, 7, 6)
+        trainDialog.show()
 
 
     def initUI(self):
