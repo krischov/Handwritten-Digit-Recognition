@@ -318,11 +318,12 @@ class canvas(QMainWindow):
                     msg.setText("Selected model and trained model are not the same.")
                     x = msg.exec_()
         elif(M_Trained == 0):
-            msg3 = QMessageBox()
-            msg3.setIcon(QMessageBox.Critical)
-            msg3.setWindowTitle("Error: Model not trained")
-            msg3.setText("Please train model.")
-            x = msg3.exec_()
+            if(MNIST_DOWNLOADED == 1):
+                msg3 = QMessageBox()
+                msg3.setIcon(QMessageBox.Critical)
+                msg3.setWindowTitle("Error: Model not trained")
+                msg3.setText("Please train model.")
+                x = msg3.exec_()
         ShowProbabilityGraph(Data)
         
 
