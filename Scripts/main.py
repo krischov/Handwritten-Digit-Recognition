@@ -503,15 +503,15 @@ class mainWindow(QMainWindow):
         # Main window initialisation
         testDialog = QMainWindow(self)
         testDialog.resize(560, 600)
-        testDialog.setWindowTitle('IMAGES')
+        testDialog.setWindowTitle('MNIST Test Images')
 
 
         wid = QWidget(self)
         testDialog.setCentralWidget(wid)
         testDialogLayout = QGridLayout(wid)
         
-        nextButton = QPushButton('Next batch', self)
-        prevButton = QPushButton('Previous batch', self)
+        nextButton = QPushButton('Next Page', self)
+        prevButton = QPushButton('Previous Page', self)
         
         
 
@@ -639,15 +639,15 @@ class mainWindow(QMainWindow):
         # Main window initialisation
         trainDialog = QMainWindow(self)
         trainDialog.resize(560, 600)
-        trainDialog.setWindowTitle('IMAGES')
+        trainDialog.setWindowTitle('MNIST Train Images')
 
 
         wid = QWidget(self)
         trainDialog.setCentralWidget(wid)
         trainDialogLayout = QGridLayout(wid)
         
-        nextButton = QPushButton('Next batch', self)
-        prevButton = QPushButton('Previous batch', self)
+        nextButton = QPushButton('Next Page', self)
+        prevButton = QPushButton('Previous Page', self)
         
         
 
