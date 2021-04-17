@@ -37,6 +37,8 @@ trainLoader = None
 testLoader = None
 MNIST_DOWNLOADED = 0
 flag = 0
+Model_Mismatch = 1
+M_Trained = 0
 
 
 #Linear Model
@@ -122,40 +124,55 @@ def testAccuracyModel(LOADER):
 # Probability graph when using Linear or Convolutional method
 def ShowProbabilityGraph(Loader):
     if(MNIST_DOWNLOADED == 1):
-        if(flag == 1): 
-            data, target = next(iter(Loader))
-            data, target = data.to(device), target.to(device)
-            img = data[0].view(1, 784)
-            ConvertedLogValue = torch.exp(model1(img))
-            ConvertedLogValue = ConvertedLogValue.cpu()
-            ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-            PredictedNum = ProbabilityList.index(max(ProbabilityList))
-            label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-            plt.barh(label,ProbabilityList)
-            plt.title('The Predicted Number is: %i'  %PredictedNum)
-            plt.ylabel('Number')
-            plt.xlabel('Probability')
-            plt.show()
-        elif(flag == 2):
-            data, target = next(iter(Loader))
-            data, target = data.to(device), target.to(device)
-            img = data[0].unsqueeze(0) #view(1, 784)
-            ConvertedLogValue = torch.exp(model2(img))
-            ConvertedLogValue = ConvertedLogValue.cpu()
-            ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-            PredictedNum = ProbabilityList.index(max(ProbabilityList))
-            label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-            plt.barh(label,ProbabilityList)
-            plt.title('The Predicted Number is: %i'  %PredictedNum)
-            plt.ylabel('Number')
-            plt.xlabel('Probability')
-            plt.show()
+        if(Model_Mismatch == 0):
+            if(M_Trained == 1):
+                if(flag == 1): 
+                    data, target = next(iter(Loader))
+                    data, target = data.to(device), target.to(device)
+                    img = data[0].view(1, 784)
+                    ConvertedLogValue = torch.exp(model1(img))
+                    ConvertedLogValue = ConvertedLogValue.cpu()
+                    ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+                    PredictedNum = ProbabilityList.index(max(ProbabilityList))
+                    label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+                    plt.barh(label,ProbabilityList)
+                    plt.title('The Predicted Number is: %i'  %PredictedNum)
+                    plt.ylabel('Number')
+                    plt.xlabel('Probability')
+                    plt.show()
+                elif(flag == 2):
+                    data, target = next(iter(Loader))
+                    data, target = data.to(device), target.to(device)
+                    img = data[0].unsqueeze(0) #view(1, 784)
+                    ConvertedLogValue = torch.exp(model2(img))
+                    ConvertedLogValue = ConvertedLogValue.cpu()
+                    ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+                    PredictedNum = ProbabilityList.index(max(ProbabilityList))
+                    label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+                    plt.barh(label,ProbabilityList)
+                    plt.title('The Predicted Number is: %i'  %PredictedNum)
+                    plt.ylabel('Number')
+                    plt.xlabel('Probability')
+                    plt.show()
+            elif(M_Trained == 0):
+                msg3 = QMessageBox()
+                msg3.setIcon(QMessageBox.Critical)
+                msg3.setWindowTitle("Error: Model not trained")
+                msg3.setText("Please train model.")
+                x = msg3.exec_()
+        if(Model_Mismatch == 1):
+            if(flag == 0):
+                msg3 = QMessageBox()
+                msg3.setIcon(QMessageBox.Critical)
+                msg3.setWindowTitle("Error: Model not selected")
+                msg3.setText("Please select and train model. If a model has been trained make sure that the right model is selected.")
+                x = msg3.exec_()
     elif(MNIST_DOWNLOADED == 0):
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Critical)
-        msg.setWindowTitle("Error")
-        msg.setText("MNIST is not downloaded!")
-        x = msg.exec_()
+        msg2 = QMessageBox()
+        msg2.setIcon(QMessageBox.Critical)
+        msg2.setWindowTitle("Error")
+        msg2.setText("MNIST is not downloaded!")
+        x = msg2.exec_()
 
 
 
@@ -283,12 +300,29 @@ class canvas(QMainWindow):
 
         recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
         Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
-
+        global Model_Mismatch
         if(flag == 1):
-            loadModel = model1.load_state_dict(torch.load('model\model.pth'))
+            try:
+                loadModel = model1.load_state_dict(torch.load('model\model.pth'))
+                Model_Mismatch = 0
+            except RuntimeError:
+                Model_Mismatch = 1
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Critical)
+                msg.setWindowTitle("Model Mismatch")
+                msg.setText("Selected model and trained model are not the same.")
+                x = msg.exec_()
         elif(flag == 2):
-            loadModel = model2.load_state_dict(torch.load('model\model.pth'))
-
+            try:
+                loadModel = model2.load_state_dict(torch.load('model\model.pth'))
+                Model_Mismatch = 0
+            except RuntimeError:
+                Model_Mismatch = 1
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Critical)
+                msg.setWindowTitle("Model Mismatch")
+                msg.setText("Selected model and trained model are not the same.")
+                x = msg.exec_()
         ShowProbabilityGraph(Data)
         
 
@@ -343,13 +377,13 @@ class mainWindow(QMainWindow):
         def resetProgressBar(self):
             progressBar.setValue(0)
 
-
         # Nested functions to train dataset, also iterates the progress bar
         def trainDataset(self):
             if(MNIST_DOWNLOADED == 1):
                 # Trains the model over x amount of epochs (10 in this case)
                 def TrainOverEpochs(epochNum):
                     global progress
+                    global M_Trained
                     final_accuracy = 0
                     Percentage_Progress = 0
                     account = 0
@@ -393,7 +427,8 @@ class mainWindow(QMainWindow):
                             msg.append("Do not switch the model before leaving this window unless you intend to retrain.")
                             # Saves model so you don't need to retrain
                             torch.save(model1.state_dict(), 'model\model.pth')
-                    if(flag == 2):
+                            M_Trained = 1
+                    elif(flag == 2):
                         msg.append("Training Convolutional Model...")
                         for epoch in range (1, epochNum + 1):
                             model2.train()
@@ -429,14 +464,15 @@ class mainWindow(QMainWindow):
                             msg.append("Do not switch the model before leaving this window unless you intend to retrain.")
                             # Saves model so you don't need to retrain
                             torch.save(model2.state_dict(), 'model\model.pth')
+                            M_Trained = 1
 
                 TrainOverEpochs(epochNum)
             elif(MNIST_DOWNLOADED == 0):
-                msg = QMessageBox()
-                msg.setIcon(QMessageBox.Critical)
-                msg.setWindowTitle("Error")
-                msg.setText("MNIST is not downloaded!")
-                x = msg.exec_()
+                msg2 = QMessageBox()
+                msg2.setIcon(QMessageBox.Critical)
+                msg2.setWindowTitle("Error")
+                msg2.setText("MNIST is not downloaded!")
+                x = msg2.exec_()
         
         # Buttons, Labels, and text browser to show progress
         downloadMNIST = QPushButton('Download MNIST', self)
