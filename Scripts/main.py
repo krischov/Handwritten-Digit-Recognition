@@ -348,7 +348,6 @@ class mainWindow(QMainWindow):
     # Popup window for train model view
     def trainModelDialog(self):
         trainButton = QPushButton('Train', self)
-        cancelButton = QPushButton('Cancel', self)
         progressBar = QProgressBar(self)
         progressLabel = QLabel('Progress: ')
 
@@ -390,9 +389,6 @@ class mainWindow(QMainWindow):
                 msg.append('Please Locally Install MNIST Dataset into Data folder.')
             progressBar.setValue(100)
 
-        # Reset progress bar back to 0
-        def resetProgressBar(self):
-            progressBar.setValue(0)
 
         # Nested functions to train dataset, also iterates the progress bar
         def trainDataset(self):
@@ -497,7 +493,6 @@ class mainWindow(QMainWindow):
         downloadMNIST = QPushButton('Download MNIST', self)
         trainButton.clicked.connect(trainDataset)
         downloadMNIST.clicked.connect(downloadDataset)
-        cancelButton.clicked.connect(resetProgressBar)
         
         # Changes to linear model
         def changeToLinearModel(self):
@@ -557,7 +552,6 @@ class mainWindow(QMainWindow):
         widgetGrid.addWidget(progressBar, 1, 1, 1, 4)
         widgetGrid.addWidget(downloadMNIST, 2, 0)
         widgetGrid.addWidget(trainButton, 2, 1)
-        widgetGrid.addWidget(cancelButton, 2, 2)
         widgetGrid.addWidget(listOfModels, 2, 4)
 
         widget.exec_()
