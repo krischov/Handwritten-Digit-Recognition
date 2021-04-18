@@ -46,6 +46,10 @@ flag = 0
 #Boolean that checks if a model has been trained since program start
 M_Initialised = False
 
+#Stores string of what model is trained
+M_TRAINED = "NONE"
+
+M_ACCURACY = 0
 
 #Linear Model
 class TestNet(nn.Module):
@@ -350,6 +354,18 @@ class mainWindow(QMainWindow):
 
         # Creating text box to append download progress status
         msg = QTextBrowser()
+        if(MNIST_DOWNLOADED == True):
+            MNIST_STATE = "YES"
+        else: MNIST_STATE = "NO"
+
+        if(M_ACCURACY == 0):
+            Accuracy = "UNDEFINED as no model is trained."
+        else: Accuracy =  "{}%".format(M_ACCURACY)
+
+        msg.append("MNIST Downloaded: " + MNIST_STATE)
+        msg.append("Trained Model is: " + M_TRAINED)
+        msg.append("Model Accuracy is: " + Accuracy)
+    
         def downloadDataset(self):
             completed = 0
             try:
@@ -366,7 +382,7 @@ class mainWindow(QMainWindow):
                 trainLoader = data.DataLoader(dataset = trainData, batch_size = batch_size, shuffle = True, pin_memory = True, num_workers = 4)
                 global testLoader
                 testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
-                msg.append('Dataset Successfully Downloaded')
+                msg.append('MNIST Dataset Successfully Downloaded')
                 global MNIST_DOWNLOADED
                 MNIST_DOWNLOADED = True
             except: 
@@ -385,6 +401,8 @@ class mainWindow(QMainWindow):
                 def TrainOverEpochs(epochNum):
                     global progress
                     global M_Initialised
+                    global M_TRAINED
+                    global M_ACCURACY
                     final_accuracy = 0
                     Percentage_Progress = 0
                     account = 0
@@ -424,7 +442,10 @@ class mainWindow(QMainWindow):
                             progressBar.setValue(100)
                             accuracy = round(float((testAccuracyModel(testLoader))), 2)
                             finalAccuracy = round(float(accuracy), 2)
+                            msg.append("Linear Model Trained")
+                            M_TRAINED = "Linear"
                             msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
+                            M_ACCURACY = finalAccuracy
                             # Saves model so you don't need to retrain
                             torch.save(model1.state_dict(), 'model\model.pth')
                             M_Initialised = True
@@ -460,7 +481,10 @@ class mainWindow(QMainWindow):
                             progressBar.setValue(100)
                             accuracy = round(float((testAccuracyModel(testLoader))), 2)
                             finalAccuracy = round(float(accuracy), 2)
+                            msg.append("Convolutional Model Trained")
+                            M_TRAINED = "Convolutional"
                             msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
+                            M_ACCURACY = finalAccuracy
                             # Saves model so you don't need to retrain
                             torch.save(model2.state_dict(), 'model\model.pth')
                             M_Initialised = True
@@ -479,13 +503,13 @@ class mainWindow(QMainWindow):
         def changeToLinearModel(self):
             global flag
             flag = 1
-            msg.append(("Switched to Linear Model"))
+            msg.append(("Switched to Linear Model."))
 
         # Changes to convolutional model
         def changeToConvModel(self):
             global flag
             flag = 2
-            msg.append(("Switched to Convolutional Model"))
+            msg.append(("Switched to Convolutional Model."))
             msg.append("Convolutional Model: Do not attempt to train without a CUDA device.")
 
         
