@@ -35,10 +35,16 @@ trainData = None
 testData = None
 trainLoader = None
 testLoader = None
-MNIST_DOWNLOADED = 0
+
+#Boolean that keeps track if MNIST dataset is downloaded
+MNIST_DOWNLOADED = False
+
+#Flag that checks if model 1 or model 2 is selected
+#Initialised to zero originally
 flag = 0
-Model_Mismatch = 1
-M_Trained = 0
+
+#Boolean that checks if a model has been trained since program start
+M_Initialised = False
 
 
 #Linear Model
@@ -94,6 +100,34 @@ criterion = nn.NLLLoss()
 optimizer1 = optim.SGD(model1.parameters(), lr = learning_rate, momentum = 0.5)
 optimizer2 = optim.SGD(model2.parameters(), lr = learning_rate, momentum = 0.5)
 
+#Methods for error messages
+def model_MismatchMsg():
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
+    msg.setWindowTitle("Model Mismatch")
+    msg.setText("Selected model and trained model are not the same.")
+    x = msg.exec_()
+    
+def model_NotTrainedMsg():
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
+    msg.setWindowTitle("Error: Model not trained")
+    msg.setText("Please train model.")
+    x = msg.exec_()
+
+def model_MNISTNotDownloadedMsg():
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
+    msg.setWindowTitle("Error")
+    msg.setText("MNIST is not downloaded!")
+    x = msg.exec_()
+
+def model_NotSelectedMsg():
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
+    msg.setWindowTitle("Error")
+    msg.setText("Model not selected!")
+    x = msg.exec_()
 
 # Tests for accuracy of the model and prints a percentage
 def testAccuracyModel(LOADER):
@@ -123,50 +157,34 @@ def testAccuracyModel(LOADER):
 
 # Probability graph when using Linear or Convolutional method
 def ShowProbabilityGraph(Loader):
-    if(MNIST_DOWNLOADED == 1):
-        if(Model_Mismatch == 0):
-            if(flag == 1): 
-                data, target = next(iter(Loader))
-                data, target = data.to(device), target.to(device)
-                img = data[0].view(1, 784)
-                ConvertedLogValue = torch.exp(model1(img))
-                ConvertedLogValue = ConvertedLogValue.cpu()
-                ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-                PredictedNum = ProbabilityList.index(max(ProbabilityList))
-                label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-                plt.barh(label,ProbabilityList)
-                plt.title('The Predicted Number is: %i'  %PredictedNum)
-                plt.ylabel('Number')
-                plt.xlabel('Probability')
-                plt.show()
-            elif(flag == 2):
-                data, target = next(iter(Loader))
-                data, target = data.to(device), target.to(device)
-                img = data[0].unsqueeze(0) #view(1, 784)
-                ConvertedLogValue = torch.exp(model2(img))
-                ConvertedLogValue = ConvertedLogValue.cpu()
-                ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-                PredictedNum = ProbabilityList.index(max(ProbabilityList))
-                label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-                plt.barh(label,ProbabilityList)
-                plt.title('The Predicted Number is: %i'  %PredictedNum)
-                plt.ylabel('Number')
-                plt.xlabel('Probability')
-                plt.show()
-        elif(Model_Mismatch == 1):
-            if(flag == 0):
-                msg3 = QMessageBox()
-                msg3.setIcon(QMessageBox.Critical)
-                msg3.setWindowTitle("Error: Model not selected")
-                msg3.setText("Please select and train model.")
-                x = msg3.exec_()
-    elif(MNIST_DOWNLOADED == 0):
-        msg2 = QMessageBox()
-        msg2.setIcon(QMessageBox.Critical)
-        msg2.setWindowTitle("Error")
-        msg2.setText("MNIST is not downloaded!")
-        x = msg2.exec_()
-
+    if(flag == 1): 
+        data, target = next(iter(Loader))
+        data, target = data.to(device), target.to(device)
+        img = data[0].view(1, 784)
+        ConvertedLogValue = torch.exp(model1(img))
+        ConvertedLogValue = ConvertedLogValue.cpu()
+        ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+        PredictedNum = ProbabilityList.index(max(ProbabilityList))
+        label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        plt.barh(label,ProbabilityList)
+        plt.title('The Predicted Number is: %i'  %PredictedNum)
+        plt.ylabel('Number')
+        plt.xlabel('Probability')
+        plt.show()
+    elif(flag == 2):
+        data, target = next(iter(Loader))
+        data, target = data.to(device), target.to(device)
+        img = data[0].unsqueeze(0)
+        ConvertedLogValue = torch.exp(model2(img))
+        ConvertedLogValue = ConvertedLogValue.cpu()
+        ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+        PredictedNum = ProbabilityList.index(max(ProbabilityList))
+        label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        plt.barh(label,ProbabilityList)
+        plt.title('The Predicted Number is: %i'  %PredictedNum)
+        plt.ylabel('Number')
+        plt.xlabel('Probability')
+        plt.show()
 
 
 #Transforms
@@ -182,17 +200,7 @@ datasetTransform2 = transforms.Compose([
     transforms.Normalize((0.5), (0.5)),
 ])
 
-# Train and test data
-
-
-
-
-
 ################# GUI CONFIGURATIONS AND IMPLEMENTATIONS #################
-
-
-
-
 
 # This class will be a 2nd main window and will switch between the 2 upon event
 class canvas(QMainWindow):
@@ -280,7 +288,7 @@ class canvas(QMainWindow):
     def paintEvent(self, event):
         canvasPainter = QPainter(self)
         canvasPainter.drawImage(self.rect(), self.canvasImage, self.canvasImage.rect())
-        
+
     # Save function for recognition
     def saveAndRecognise(self):
 
@@ -294,38 +302,29 @@ class canvas(QMainWindow):
         recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
         Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
         global Model_Mismatch
-        if(M_Trained == 1):
-            if(flag == 1):
-                try:
-                    loadModel = model1.load_state_dict(torch.load('model\model.pth'))
-                    Model_Mismatch = 0
-                except RuntimeError:
-                    Model_Mismatch = 1
-                    msg = QMessageBox()
-                    msg.setIcon(QMessageBox.Critical)
-                    msg.setWindowTitle("Model Mismatch")
-                    msg.setText("Selected model and trained model are not the same.")
-                    x = msg.exec_()
-            elif(flag == 2):
-                try:
-                    loadModel = model2.load_state_dict(torch.load('model\model.pth'))
-                    Model_Mismatch = 0
-                except RuntimeError:
-                    Model_Mismatch = 1
-                    msg = QMessageBox()
-                    msg.setIcon(QMessageBox.Critical)
-                    msg.setWindowTitle("Model Mismatch")
-                    msg.setText("Selected model and trained model are not the same.")
-                    x = msg.exec_()
-        elif(M_Trained == 0):
-            if(MNIST_DOWNLOADED == 1):
-                msg3 = QMessageBox()
-                msg3.setIcon(QMessageBox.Critical)
-                msg3.setWindowTitle("Error: Model not trained")
-                msg3.setText("Please train model.")
-                x = msg3.exec_()
-        ShowProbabilityGraph(Data)
-        
+        if(MNIST_DOWNLOADED == True):
+            if(M_Initialised == True):
+                if(flag == 0):
+                    model_NotSelectedMsg()
+                elif(flag == 1):
+                    try:
+                        loadModel = model1.load_state_dict(torch.load('model\model.pth'))
+                        ShowProbabilityGraph(Data)
+                    except RuntimeError:
+                        model_MismatchMsg()
+                elif(flag == 2):
+                    try:
+                        loadModel = model2.load_state_dict(torch.load('model\model.pth'))
+                        ShowProbabilityGraph(Data)
+                    except RuntimeError:
+                        model_MismatchMsg()
+            elif(M_Initialised == False):
+                if(flag == 0):
+                    model_NotSelectedMsg()
+                else:
+                    model_NotTrainedMsg()
+        elif(MNIST_DOWNLOADED == False):
+            model_MNISTNotDownloadedMsg()
 
 
     def clear(self):
@@ -369,7 +368,7 @@ class mainWindow(QMainWindow):
                 testLoader = data.DataLoader(dataset = testData, batch_size = batch_size, shuffle = False)
                 msg.append('Dataset Successfully Downloaded')
                 global MNIST_DOWNLOADED
-                MNIST_DOWNLOADED = 1
+                MNIST_DOWNLOADED = True
             except: 
                 msg.append('HTTP Error 503: Service Unavailable')
                 msg.append('Please Locally Install MNIST Dataset into Data folder.')
@@ -381,11 +380,11 @@ class mainWindow(QMainWindow):
 
         # Nested functions to train dataset, also iterates the progress bar
         def trainDataset(self):
-            if(MNIST_DOWNLOADED == 1):
+            if(MNIST_DOWNLOADED == True):
                 # Trains the model over x amount of epochs (10 in this case)
                 def TrainOverEpochs(epochNum):
                     global progress
-                    global M_Trained
+                    global M_Initialised
                     final_accuracy = 0
                     Percentage_Progress = 0
                     account = 0
@@ -426,10 +425,9 @@ class mainWindow(QMainWindow):
                             accuracy = round(float((testAccuracyModel(testLoader))), 2)
                             finalAccuracy = round(float(accuracy), 2)
                             msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
-                            msg.append("Do not switch the model before leaving this window unless you intend to retrain.")
                             # Saves model so you don't need to retrain
                             torch.save(model1.state_dict(), 'model\model.pth')
-                            M_Trained = 1
+                            M_Initialised = True
                     elif(flag == 2):
                         msg.append("Training Convolutional Model...")
                         for epoch in range (1, epochNum + 1):
@@ -463,18 +461,13 @@ class mainWindow(QMainWindow):
                             accuracy = round(float((testAccuracyModel(testLoader))), 2)
                             finalAccuracy = round(float(accuracy), 2)
                             msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
-                            msg.append("Do not switch the model before leaving this window unless you intend to retrain.")
                             # Saves model so you don't need to retrain
                             torch.save(model2.state_dict(), 'model\model.pth')
-                            M_Trained = 1
+                            M_Initialised = True
 
                 TrainOverEpochs(epochNum)
-            elif(MNIST_DOWNLOADED == 0):
-                msg2 = QMessageBox()
-                msg2.setIcon(QMessageBox.Critical)
-                msg2.setWindowTitle("Error")
-                msg2.setText("MNIST is not downloaded!")
-                x = msg2.exec_()
+            elif(MNIST_DOWNLOADED == False):
+                model_MNISTNotDownloadedMsg()
         
         # Buttons, Labels, and text browser to show progress
         downloadMNIST = QPushButton('Download MNIST', self)
@@ -486,13 +479,13 @@ class mainWindow(QMainWindow):
         def changeToLinearModel(self):
             global flag
             flag = 1
-            msg.append(("Switched to Linear Model. Re-train required."))
+            msg.append(("Switched to Linear Model"))
 
         # Changes to convolutional model
         def changeToConvModel(self):
             global flag
             flag = 2
-            msg.append(("Switched to Convolutional Model. Re-train required."))
+            msg.append(("Switched to Convolutional Model"))
             msg.append("Convolutional Model: Do not attempt to train without a CUDA device.")
 
         
@@ -512,7 +505,6 @@ class mainWindow(QMainWindow):
                 global flag
                 flag = 0
                 msg.append("Model must be selected.")
-
             if (modelIndex == 1):
                 changeToLinearModel(self)
             if (modelIndex == 2):
@@ -550,7 +542,7 @@ class mainWindow(QMainWindow):
         
      # Adds testing images into sub plot
     def openTestImages(self):
-        if(MNIST_DOWNLOADED == 1):
+        if(MNIST_DOWNLOADED == True):
             # Global index to be used for next and previous batches
             global imageIndex
             imageIndex = 0
@@ -682,16 +674,12 @@ class mainWindow(QMainWindow):
             testDialogLayout.addWidget(prevButton, 8, 6)
             testDialogLayout.addWidget(nextButton, 7, 6)
             testDialog.show()
-        elif(MNIST_DOWNLOADED == 0):
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setWindowTitle("Error")
-            msg.setText("MNIST is not downloaded!")
-            x = msg.exec_()
+        elif(MNIST_DOWNLOADED == False):
+            model_MNISTNotDownloadedMsg()
 
     # Displays training images on a plot       
     def openTrainedImages(self):
-        if(MNIST_DOWNLOADED == 1):
+        if(MNIST_DOWNLOADED == True):
             # Global index to be used for next and previous batches
             global imageIndex
             imageIndex = 0
@@ -823,13 +811,8 @@ class mainWindow(QMainWindow):
             trainDialogLayout.addWidget(prevButton, 8, 6)
             trainDialogLayout.addWidget(nextButton, 7, 6)
             trainDialog.show()
-        elif(MNIST_DOWNLOADED == 0):
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setWindowTitle("Error")
-            msg.setText("MNIST is not downloaded!")
-            x = msg.exec_()
-
+        elif(MNIST_DOWNLOADED == False):
+            model_MNISTNotDownloadedMsg()
 
 
     def initUI(self):
