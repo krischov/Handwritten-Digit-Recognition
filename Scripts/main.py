@@ -494,6 +494,7 @@ class mainWindow(QMainWindow):
         def usePreloadedModel(self):
             global M_ACCURACY
             global M_TRAINED
+            global M_Initialised
             if(MNIST_DOWNLOADED == True):
                 if(flag == 0):
                     msg3 = QMessageBox()
@@ -511,6 +512,7 @@ class mainWindow(QMainWindow):
                         msg.append("Pretrained Linear Model is loaded.")
                         msg.append(("Model Accuracy is: {}%".format(finalAccuracy)))
                         torch.save(model1.state_dict(), 'model\model.pth')
+                        M_Initialised = True
                     except RuntimeError:
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
@@ -534,6 +536,7 @@ class mainWindow(QMainWindow):
                         msg.append("Pretrained Convolutional Model is loaded.")
                         msg.append(("Model Accuracy is: {}%".format(finalAccuracy)))
                         torch.save(model2.state_dict(), 'model\model.pth')
+                        M_Initialised = True
                     except RuntimeError:
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
