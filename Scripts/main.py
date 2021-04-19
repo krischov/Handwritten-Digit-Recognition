@@ -517,7 +517,7 @@ class mainWindow(QMainWindow):
                         msg1.setWindowTitle("Error")
                         msg1.setText("Model does not match selected model")
                         x = msg1.exec_()
-                    except TypeError:
+                    except FileNotFoundError:
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
                         msg1.setWindowTitle("Error")
@@ -540,7 +540,7 @@ class mainWindow(QMainWindow):
                         msg1.setWindowTitle("Error")
                         msg1.setText("Model does not match selected model")
                         x = msg1.exec_()
-                    except TypeError:
+                    except FileNotFoundError:
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
                         msg1.setWindowTitle("Error")
@@ -568,7 +568,7 @@ class mainWindow(QMainWindow):
                         msg1.setWindowTitle("Error")
                         msg1.setText("Model type in 'model' folder does not match selected model")
                         x = msg1.exec_()
-                    except TypeError:
+                    except FileNotFoundError:
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
                         msg1.setWindowTitle("Error")
@@ -585,7 +585,7 @@ class mainWindow(QMainWindow):
                         msg1.setWindowTitle("Error")
                         msg1.setText("Model type in 'model' folder does not match selected model")
                         x = msg1.exec_()
-                    except TypeError:
+                    except FileNotFoundError:
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
                         msg1.setWindowTitle("Error")
