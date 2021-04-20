@@ -214,7 +214,6 @@ class canvas(QMainWindow):
         self.show()
 
         
-
         # Window configurations
         top = 400
         left = 400
@@ -236,11 +235,6 @@ class canvas(QMainWindow):
         # Menu bar setup
         mainMenu = self.menuBar()
         fileMenu = mainMenu.addMenu("File")
-        
-        # # Save file in image format onto hard drive for analysis
-        # saveAction = QAction(QIcon("Icons\save.png"), "Save", self)
-        # saveAction.setShortcut("Ctrl+S")
-        # saveAction.triggered.connect(self.save)
 
         # Clear canvas
         clearAction = QAction(QIcon("Icons\clear.png"), "Clear", self)
@@ -306,6 +300,8 @@ class canvas(QMainWindow):
         recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
         Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
         global Model_Mismatch
+
+        # Try and except to check if a model is loaded, if not, present error to train model
         if(MNIST_DOWNLOADED == True):
             if(M_Initialised == True):
                 if(flag == 0):
@@ -367,6 +363,7 @@ class mainWindow(QMainWindow):
         msg.append("Trained Model is: " + M_TRAINED)
         msg.append("Model Accuracy is: " + Accuracy)
     
+        # Function to download the MNIST dataset
         def downloadDataset(self):
             completed = 0
             try:
@@ -395,6 +392,7 @@ class mainWindow(QMainWindow):
         # Nested functions to train dataset, also iterates the progress bar
         def trainDataset(self):
             if(MNIST_DOWNLOADED == True):
+
                 # Trains the model over x amount of epochs (10 in this case)
                 def TrainOverEpochs(epochNum):
                     global progress
@@ -413,6 +411,7 @@ class mainWindow(QMainWindow):
                         for epoch in range (1, epochNum + 1):
                             model1.train()
                             for i, (data, target) in enumerate(trainLoader):
+
                                 #Code that trains the model
                                 data, target = data.to(device), target.to(device)
                                 optimizer1.zero_grad()
@@ -420,8 +419,10 @@ class mainWindow(QMainWindow):
                                 loss = criterion(output, target)
                                 loss.backward()
                                 optimizer1.step()
+
                                 # Ensuring calculations are not done too frequently
                                 if (i % 10 == 0):
+
                                     #Code that keeps track of the training progress
                                     Batch_Progress = (i/(len(trainLoader)))
                                     Percentage_Progress = Batch_Progress * 100
@@ -432,10 +433,12 @@ class mainWindow(QMainWindow):
                                         if(Percentage_Progress == 0):
                                             account += (100/(epochNum))
                                     Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
+                                    
                                 # Append current status to progress bar
                                 progress = int(Current_Training_Progress)
                                 progressBar.setValue(progress)
-                            #Code that Calculates Final Accuracy
+
+                        #Code that Calculates Final Accuracy
                         if(epoch == epochNum):
                             progressBar.setValue(100)
                             accuracy = round(float((testAccuracyModel(testLoader))), 2)
@@ -444,14 +447,17 @@ class mainWindow(QMainWindow):
                             M_TRAINED = "Linear"
                             msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
                             M_ACCURACY = finalAccuracy
+
                             # Saves model so you don't need to retrain
                             torch.save(model1.state_dict(), 'model\model.pth')
                             M_Initialised = True
+
                     elif(flag == 2):
                         msg.append("Training Convolutional Model...")
                         for epoch in range (1, epochNum + 1):
                             model2.train()
                             for i, (data, target) in enumerate(trainLoader):
+
                                 #Code that trains the model
                                 data, target = data.to(device), target.to(device)
                                 optimizer2.zero_grad()
@@ -459,8 +465,10 @@ class mainWindow(QMainWindow):
                                 loss = criterion(output, target)
                                 loss.backward()
                                 optimizer2.step()
+
                                 # Ensuring calculations are not done too frequently
                                 if (i % 10 == 0):
+
                                     #Code that keeps track of the training progress
                                     Batch_Progress = (i/(len(trainLoader)))
                                     Percentage_Progress = Batch_Progress * 100
@@ -471,10 +479,12 @@ class mainWindow(QMainWindow):
                                         if(Percentage_Progress == 0):
                                             account += (100/(epochNum))
                                     Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
+
                                 # Append current status to progress bar
                                 progress = int(Current_Training_Progress)
                                 progressBar.setValue(progress)
-                            #Code that Calculates Final Accuracy
+
+                        #Code that Calculates Final Accuracy
                         if(epoch == epochNum):
                             progressBar.setValue(100)
                             accuracy = round(float((testAccuracyModel(testLoader))), 2)
@@ -483,6 +493,7 @@ class mainWindow(QMainWindow):
                             M_TRAINED = "Convolutional"
                             msg.append(("Final Accuracy is: {}%".format(finalAccuracy)))
                             M_ACCURACY = finalAccuracy
+
                             # Saves model so you don't need to retrain
                             torch.save(model2.state_dict(), 'model\model.pth')
                             M_Initialised = True
@@ -491,6 +502,8 @@ class mainWindow(QMainWindow):
             elif(MNIST_DOWNLOADED == False):
                 model_MNISTNotDownloadedMsg()
         
+        # Function to use a preloaded model that is saved in the respective folder
+        # If the model does not exist, return QDialog error saying it does not exist.
         def usePreloadedModel(self):
             global M_ACCURACY
             global M_TRAINED
@@ -605,6 +618,7 @@ class mainWindow(QMainWindow):
         downloadMNIST.clicked.connect(downloadDataset)
         PreloadButton.clicked.connect(usePreloadedModel)
         SaveButton.clicked.connect(SaveModel)
+
         # Changes to linear model
         def changeToLinearModel(self):
             global flag
@@ -646,6 +660,7 @@ class mainWindow(QMainWindow):
         listOfModels.addItem('Linear')
         listOfModels.addItem('Convolutional')
         listOfModels.setCurrentIndex(Current_Model_Index)
+
         # Assigning index to variable which will be passed into the 
         # onActivated function for index change
         choice = listOfModels.currentText()
@@ -946,10 +961,8 @@ class mainWindow(QMainWindow):
         elif(MNIST_DOWNLOADED == False):
             model_MNISTNotDownloadedMsg()
 
-
+    # Initialises UI for the main window
     def initUI(self):
-
-
         viewTrainingImages = QAction('View Training Images', self)
         viewTrainingImages.triggered.connect(self.openTrainedImages)
 
