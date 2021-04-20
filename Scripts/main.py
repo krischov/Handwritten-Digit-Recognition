@@ -517,7 +517,7 @@ class mainWindow(QMainWindow):
                     x = msg3.exec_()
                 elif(flag == 1):
                     try:
-                        loadModel = model1.load_state_dict(torch.load('Saved Model\model.pth'))
+                        loadModel = model1.load_state_dict(torch.load('Saved Model\Linear\model.pth'))
                         accuracy = round(float((testAccuracyModel(testLoader))), 2)
                         finalAccuracy = round(float(accuracy), 2)
                         M_ACCURACY = finalAccuracy
@@ -540,7 +540,7 @@ class mainWindow(QMainWindow):
                         x = msg1.exec_()                        
                 elif(flag == 2):
                     try:
-                        loadModel = model2.load_state_dict(torch.load('Saved Model\model.pth'))
+                        loadModel = model2.load_state_dict(torch.load('Saved Model\Convolutional\model.pth'))
                         M_ACCURACY = testAccuracyModel(testLoader)
                         accuracy = round(float((testAccuracyModel(testLoader))), 2)
                         finalAccuracy = round(float(accuracy), 2)
@@ -576,7 +576,7 @@ class mainWindow(QMainWindow):
                 elif(flag == 1):
                     try:
                         loadModel = model1.load_state_dict(torch.load('model\model.pth'))
-                        torch.save(model1.state_dict(), 'Saved Model\model.pth')
+                        torch.save(model1.state_dict(), 'Saved Model\Linear\model.pth')
                         msg.append("Linear Model in 'model' folder has been saved in 'Saved Model'")
                     except (RuntimeError):
                         msg1 = QMessageBox()
@@ -593,7 +593,7 @@ class mainWindow(QMainWindow):
                 elif(flag == 2):
                     try:
                         loadModel = model2.load_state_dict(torch.load('model\model.pth'))
-                        torch.save(model2.state_dict(), 'Saved Model\model.pth')
+                        torch.save(model2.state_dict(), 'Saved Model\Convolutional\model.pth')
                         msg.append("Convolutional Model in 'model' folder has been saved in 'Saved Model'")
                     except RuntimeError:
                         msg1 = QMessageBox()
