@@ -350,6 +350,8 @@ class mainWindow(QMainWindow):
         trainButton = QPushButton('Train', self)
         progressBar = QProgressBar(self)
         progressLabel = QLabel('Progress: ')
+        PreloadButton = QPushButton('Use Saved', self)
+        SaveButton = QPushButton('Save Model', self)
 
         # Creating text box to append download progress status
         msg = QTextBrowser()
@@ -489,11 +491,120 @@ class mainWindow(QMainWindow):
             elif(MNIST_DOWNLOADED == False):
                 model_MNISTNotDownloadedMsg()
         
+        def usePreloadedModel(self):
+            global M_ACCURACY
+            global M_TRAINED
+            global M_Initialised
+            if(MNIST_DOWNLOADED == True):
+                if(flag == 0):
+                    msg3 = QMessageBox()
+                    msg3.setIcon(QMessageBox.Critical)
+                    msg3.setWindowTitle("Model Unselected")
+                    msg3.setText("Please select the model type you wish to load.")
+                    x = msg3.exec_()
+                elif(flag == 1):
+                    try:
+                        loadModel = model1.load_state_dict(torch.load('Saved Model\model.pth'))
+                        accuracy = round(float((testAccuracyModel(testLoader))), 2)
+                        finalAccuracy = round(float(accuracy), 2)
+                        M_ACCURACY = finalAccuracy
+                        M_TRAINED = "Linear"
+                        msg.append("Pretrained Linear Model is loaded.")
+                        msg.append(("Model Accuracy is: {}%".format(finalAccuracy)))
+                        torch.save(model1.state_dict(), 'model\model.pth')
+                        M_Initialised = True
+                    except RuntimeError:
+                        msg1 = QMessageBox()
+                        msg1.setIcon(QMessageBox.Critical)
+                        msg1.setWindowTitle("Error")
+                        msg1.setText("Model does not match selected model")
+                        x = msg1.exec_()
+                    except FileNotFoundError:
+                        msg1 = QMessageBox()
+                        msg1.setIcon(QMessageBox.Critical)
+                        msg1.setWindowTitle("Error")
+                        msg1.setText("There is no model in folder.")
+                        x = msg1.exec_()                        
+                elif(flag == 2):
+                    try:
+                        loadModel = model2.load_state_dict(torch.load('Saved Model\model.pth'))
+                        M_ACCURACY = testAccuracyModel(testLoader)
+                        accuracy = round(float((testAccuracyModel(testLoader))), 2)
+                        finalAccuracy = round(float(accuracy), 2)
+                        M_ACCURACY = finalAccuracy
+                        M_TRAINED = "Convolutional"
+                        msg.append("Pretrained Convolutional Model is loaded.")
+                        msg.append(("Model Accuracy is: {}%".format(finalAccuracy)))
+                        torch.save(model2.state_dict(), 'model\model.pth')
+                        M_Initialised = True
+                    except RuntimeError:
+                        msg1 = QMessageBox()
+                        msg1.setIcon(QMessageBox.Critical)
+                        msg1.setWindowTitle("Error")
+                        msg1.setText("Model does not match selected model")
+                        x = msg1.exec_()
+                    except FileNotFoundError:
+                        msg1 = QMessageBox()
+                        msg1.setIcon(QMessageBox.Critical)
+                        msg1.setWindowTitle("Error")
+                        msg1.setText("There is no model in folder.")
+                        x = msg1.exec_()                                
+            elif(MNIST_DOWNLOADED == False):
+                model_MNISTNotDownloadedMsg()
+
+        def SaveModel(self):
+            if(MNIST_DOWNLOADED == True):
+                if(flag == 0):
+                    msg3 = QMessageBox()
+                    msg3.setIcon(QMessageBox.Critical)
+                    msg3.setWindowTitle("Model Unselected")
+                    msg3.setText("Please select the model type you wish to save.")
+                    x = msg3.exec_()
+                elif(flag == 1):
+                    try:
+                        loadModel = model1.load_state_dict(torch.load('model\model.pth'))
+                        torch.save(model1.state_dict(), 'Saved Model\model.pth')
+                        msg.append("Linear Model in 'model' folder has been saved in 'Saved Model'")
+                    except (RuntimeError):
+                        msg1 = QMessageBox()
+                        msg1.setIcon(QMessageBox.Critical)
+                        msg1.setWindowTitle("Error")
+                        msg1.setText("Model type in 'model' folder does not match selected model")
+                        x = msg1.exec_()
+                    except FileNotFoundError:
+                        msg1 = QMessageBox()
+                        msg1.setIcon(QMessageBox.Critical)
+                        msg1.setWindowTitle("Error")
+                        msg1.setText("There is no model to be saved")
+                        x = msg1.exec_()
+                elif(flag == 2):
+                    try:
+                        loadModel = model2.load_state_dict(torch.load('model\model.pth'))
+                        torch.save(model2.state_dict(), 'Saved Model\model.pth')
+                        msg.append("Convolutional Model in 'model' folder has been saved in 'Saved Model'")
+                    except RuntimeError:
+                        msg1 = QMessageBox()
+                        msg1.setIcon(QMessageBox.Critical)
+                        msg1.setWindowTitle("Error")
+                        msg1.setText("Model type in 'model' folder does not match selected model")
+                        x = msg1.exec_()
+                    except FileNotFoundError:
+                        msg1 = QMessageBox()
+                        msg1.setIcon(QMessageBox.Critical)
+                        msg1.setWindowTitle("Error")
+                        msg1.setText("There is no model to be saved")
+                        x = msg1.exec_()              
+            elif(MNIST_DOWNLOADED == False):
+                model_MNISTNotDownloadedMsg()
+
+
+
         # Buttons, Labels, and text browser to show progress
         downloadMNIST = QPushButton('Download MNIST', self)
         trainButton.clicked.connect(trainDataset)
         downloadMNIST.clicked.connect(downloadDataset)
-        
+        PreloadButton.clicked.connect(usePreloadedModel)
+        SaveButton.clicked.connect(SaveModel)
         # Changes to linear model
         def changeToLinearModel(self):
             global flag
@@ -552,7 +663,10 @@ class mainWindow(QMainWindow):
         widgetGrid.addWidget(progressBar, 1, 1, 1, 4)
         widgetGrid.addWidget(downloadMNIST, 2, 0)
         widgetGrid.addWidget(trainButton, 2, 1)
+        widgetGrid.addWidget(PreloadButton, 2, 2)
+        widgetGrid.addWidget(SaveButton, 2, 3)
         widgetGrid.addWidget(listOfModels, 2, 4)
+        
 
         widget.exec_()
 
