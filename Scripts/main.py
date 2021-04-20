@@ -577,7 +577,7 @@ class mainWindow(QMainWindow):
                     try:
                         loadModel = model1.load_state_dict(torch.load('model\model.pth'))
                         torch.save(model1.state_dict(), 'Saved Model\Linear\model.pth')
-                        msg.append("Linear Model in 'model' folder has been saved in 'Saved Model'")
+                        msg.append("Linear Model has been saved.")
                     except (RuntimeError):
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
@@ -594,7 +594,7 @@ class mainWindow(QMainWindow):
                     try:
                         loadModel = model2.load_state_dict(torch.load('model\model.pth'))
                         torch.save(model2.state_dict(), 'Saved Model\Convolutional\model.pth')
-                        msg.append("Convolutional Model in 'model' folder has been saved in 'Saved Model'")
+                        msg.append("Convolutional Model has been saved.")
                     except RuntimeError:
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
