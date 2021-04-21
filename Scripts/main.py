@@ -308,13 +308,13 @@ class canvas(QMainWindow):
                     model_NotSelectedMsg()
                 elif(flag == 1):
                     try:
-                        loadModel = model1.load_state_dict(torch.load('model\model.pth'))
+                        loadModel = model1.load_state_dict(torch.load('model\model.pth', map_location = device))
                         ShowProbabilityGraph(Data)
                     except RuntimeError:
                         model_MismatchMsg()
                 elif(flag == 2):
                     try:
-                        loadModel = model2.load_state_dict(torch.load('model\model.pth'))
+                        loadModel = model2.load_state_dict(torch.load('model\model.pth', map_location = device))
                         ShowProbabilityGraph(Data)
                     except RuntimeError:
                         model_MismatchMsg()
@@ -517,7 +517,7 @@ class mainWindow(QMainWindow):
                     x = msg3.exec_()
                 elif(flag == 1):
                     try:
-                        loadModel = model1.load_state_dict(torch.load('Saved Model\Linear\model.pth'))
+                        loadModel = model1.load_state_dict(torch.load('Saved Model\Linear\model.pth', map_location = device))
                         accuracy = round(float((testAccuracyModel(testLoader))), 2)
                         finalAccuracy = round(float(accuracy), 2)
                         M_ACCURACY = finalAccuracy
@@ -540,7 +540,7 @@ class mainWindow(QMainWindow):
                         x = msg1.exec_()                        
                 elif(flag == 2):
                     try:
-                        loadModel = model2.load_state_dict(torch.load('Saved Model\Convolutional\model.pth'))
+                        loadModel = model2.load_state_dict(torch.load('Saved Model\Convolutional\model.pth', map_location = device))
                         M_ACCURACY = testAccuracyModel(testLoader)
                         accuracy = round(float((testAccuracyModel(testLoader))), 2)
                         finalAccuracy = round(float(accuracy), 2)
@@ -575,7 +575,7 @@ class mainWindow(QMainWindow):
                     x = msg3.exec_()
                 elif(flag == 1):
                     try:
-                        loadModel = model1.load_state_dict(torch.load('model\model.pth'))
+                        loadModel = model1.load_state_dict(torch.load('model\model.pth', map_location = device))
                         torch.save(model1.state_dict(), 'Saved Model\Linear\model.pth')
                         msg.append("Linear Model has been saved.")
                     except (RuntimeError):
@@ -592,7 +592,7 @@ class mainWindow(QMainWindow):
                         x = msg1.exec_()
                 elif(flag == 2):
                     try:
-                        loadModel = model2.load_state_dict(torch.load('model\model.pth'))
+                        loadModel = model2.load_state_dict(torch.load('model\model.pth', map_location = device))
                         torch.save(model2.state_dict(), 'Saved Model\Convolutional\model.pth')
                         msg.append("Convolutional Model has been saved.")
                     except RuntimeError:
