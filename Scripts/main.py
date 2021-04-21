@@ -518,6 +518,8 @@ class mainWindow(QMainWindow):
                 elif(flag == 1):
                     try:
                         loadModel = model1.load_state_dict(torch.load('Saved Model\Linear\model.pth', map_location = device))
+                        msg.append("Working...")
+                        progressBar.setValue(0)
                         accuracy = round(float((testAccuracyModel(testLoader))), 2)
                         finalAccuracy = round(float(accuracy), 2)
                         M_ACCURACY = finalAccuracy
@@ -526,6 +528,7 @@ class mainWindow(QMainWindow):
                         msg.append(("Model Accuracy is: {}%".format(finalAccuracy)))
                         torch.save(model1.state_dict(), 'model\model.pth')
                         M_Initialised = True
+                        progressBar.setValue(100)
                     except RuntimeError:
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
@@ -541,6 +544,8 @@ class mainWindow(QMainWindow):
                 elif(flag == 2):
                     try:
                         loadModel = model2.load_state_dict(torch.load('Saved Model\Convolutional\model.pth', map_location = device))
+                        msg.append("Working...")
+                        progressBar.setValue(0)
                         M_ACCURACY = testAccuracyModel(testLoader)
                         accuracy = round(float((testAccuracyModel(testLoader))), 2)
                         finalAccuracy = round(float(accuracy), 2)
@@ -550,6 +555,7 @@ class mainWindow(QMainWindow):
                         msg.append(("Model Accuracy is: {}%".format(finalAccuracy)))
                         torch.save(model2.state_dict(), 'model\model.pth')
                         M_Initialised = True
+                        progressBar.setValue(100)
                     except RuntimeError:
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
