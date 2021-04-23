@@ -737,6 +737,7 @@ class mainWindow(QMainWindow):
                     
 
                     label = QLabel()
+                    pixmapImage = pixmapImage.scaled(56, 56)
                     label.setPixmap(pixmapImage)
 
                     
@@ -769,6 +770,7 @@ class mainWindow(QMainWindow):
                         
 
                         label = QLabel()
+                        pixmapImage = pixmapImage.scaled(56, 56)
                         label.setPixmap(pixmapImage)
 
                         
@@ -807,6 +809,7 @@ class mainWindow(QMainWindow):
                         
 
                         label = QLabel()
+                        pixmapImage = pixmapImage.scaled(56, 56)
                         label.setPixmap(pixmapImage)
 
                         
@@ -874,6 +877,7 @@ class mainWindow(QMainWindow):
                     
 
                     label = QLabel()
+                    pixmapImage = pixmapImage.scaled(56, 56)
                     label.setPixmap(pixmapImage)
 
                     
@@ -906,6 +910,7 @@ class mainWindow(QMainWindow):
                         
 
                         label = QLabel()
+                        pixmapImage = pixmapImage.scaled(56, 56)
                         label.setPixmap(pixmapImage)
 
                         
@@ -951,6 +956,7 @@ class mainWindow(QMainWindow):
                         trainDialogLayout.addWidget(label, i, j)
 
                         label = QLabel()
+                        pixmapImage = pixmapImage.scaled(56, 56)
                         label.setPixmap(pixmapImage)
 
                         # Reducing the index by 1 and setting layout
