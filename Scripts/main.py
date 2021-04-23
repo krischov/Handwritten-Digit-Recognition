@@ -28,8 +28,10 @@ learning_rate = 0.07
 device = 'cuda' if cuda.is_available() else 'cpu'
 
 
-#Global Variable
+# Global Variables
 global Current_Training_Progress
+global PredictedNum
+
 Current_Model_Index = 0
 trainData = None
 testData = None
@@ -159,8 +161,11 @@ def testAccuracyModel(LOADER):
         return Accuracy       
 
 
+
 # Probability graph when using Linear or Convolutional method
 def ShowProbabilityGraph(Loader):
+    global PredictedNum
+    PredictedNum = 0
     if(flag == 1): 
         data, target = next(iter(Loader))
         data, target = data.to(device), target.to(device)
@@ -175,6 +180,7 @@ def ShowProbabilityGraph(Loader):
         plt.ylabel('Number')
         plt.xlabel('Probability')
         plt.show()
+
     elif(flag == 2):
         data, target = next(iter(Loader))
         data, target = data.to(device), target.to(device)
@@ -183,12 +189,36 @@ def ShowProbabilityGraph(Loader):
         ConvertedLogValue = ConvertedLogValue.cpu()
         ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
         PredictedNum = ProbabilityList.index(max(ProbabilityList))
+        
         label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
         plt.barh(label,ProbabilityList)
         plt.title('The Predicted Number is: %i'  %PredictedNum)
         plt.ylabel('Number')
         plt.xlabel('Probability')
         plt.show()
+
+
+# Calculate predicted number from drawn digit
+def probabilityCalc(Loader):
+    global PredictedNum
+    PredictedNum = 0
+    if(flag == 1): 
+        data, target = next(iter(Loader))
+        data, target = data.to(device), target.to(device)
+        img = data[0].view(1, 784)
+        ConvertedLogValue = torch.exp(model1(img))
+        ConvertedLogValue = ConvertedLogValue.cpu()
+        ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+        PredictedNum = ProbabilityList.index(max(ProbabilityList))
+
+    elif(flag == 2):
+        data, target = next(iter(Loader))
+        data, target = data.to(device), target.to(device)
+        img = data[0].unsqueeze(0)
+        ConvertedLogValue = torch.exp(model2(img))
+        ConvertedLogValue = ConvertedLogValue.cpu()
+        ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
+        PredictedNum = ProbabilityList.index(max(ProbabilityList))
 
 
 #Transforms
@@ -206,58 +236,134 @@ datasetTransform2 = transforms.Compose([
 
 ################# GUI CONFIGURATIONS AND IMPLEMENTATIONS #################
 
-# This class will be a 2nd main window and will switch between the 2 upon event
-class canvas(QMainWindow):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.parent = parent
-        self.show()
 
-        
-        # Window configurations
-        top = 400
-        left = 400
-        width = 560
-        height = 560
+
+
+# This class manages the main window and all the drop downs to train model and view images
+class mainWindow(QMainWindow):
+    global PredictedNum
+    def __init__(self):
+        super().__init__()
+        self.initUI()
 
         self.setWindowTitle("Drawing Recognition")
-        self.setFixedSize(width, height)
+        self.setFixedSize(560, 560)
 
         # Configure drawing canvas and colour format to be grayscale. Also make canvas white
         self.canvasImage = QImage(self.size(), QImage.Format_Grayscale8)
         self.canvasImage.fill(Qt.white)
+        self.canvasLabel = QLabel()
+        self.pixmap = QPixmap.fromImage(self.canvasImage)
+        self.canvasLabel.setPixmap(self.pixmap.scaled(560,560))
         
+
+        # Write the most likely digit that was drawn to the screen
+        self.probability = QTextEdit()
+        self.probability.setReadOnly(True)
+        self.probability.setFontPointSize(30)
+        
+
+        # Layouts to set canvas and buttons (canvas on left, buttons on right)
+        self.vBox = QVBoxLayout()
+        self.hBox = QHBoxLayout()
+        self.formWidget = QWidget()
+        self.recogniseButton = QPushButton('Recognise', self)
+        self.recogniseButton.clicked.connect(self.saveAndRecognise)
+
+        # Clears canvas
+        self.clearButton = QPushButton('Clear', self)
+        self.clearButton.clicked.connect(self.clear)
+
+        # Displays graph if user wishes to see full probabilities of digit
+        self.displayGraph = QPushButton('Full Graph', self)
+
+
+
+        # Adding widgets and stretch to -1 to reduce gaps between buttons
+        self.hBox.addWidget(self.canvasLabel)
+        self.vBox.addWidget(self.recogniseButton)
+        self.vBox.addWidget(self.clearButton)
+        self.vBox.addWidget(self.probability)
+        self.vBox.addWidget(self.displayGraph)
+        self.vBox.addStretch(-1)
+        self.hBox.addLayout(self.vBox)
+
 
         # Drawing pen configurations
         self.drawing = False
         self.lastPoint = QPoint()
+    
 
-        # Menu bar setup
-        mainMenu = self.menuBar()
-        fileMenu = mainMenu.addMenu("File")
-
-        # Clear canvas
-        clearAction = QAction(QIcon("Icons\clear.png"), "Clear", self)
-        clearAction.setShortcut("Ctrl+C")
-        clearAction.triggered.connect(self.clear)
-
-        # Action to recognise the number drawn
-        recogniseAction = QAction(QIcon("Icons\write.jpg"), "Recognise", self)
-        recogniseAction.setShortcut("Ctrl+R")
-        recogniseAction.triggered.connect(self.saveAndRecognise)
+    # Function which sets the layout and central widget later on, all else created earlier
+    def createCanvas(self):
+        self.formWidget.setLayout(self.hBox)
+        self.setCentralWidget(self.formWidget)
 
 
-        self.statusBar = QStatusBar()
-        self.setStatusBar(self.statusBar)
+        # Save function for recognition
+    def saveAndRecognise(self):
+        global PredictedNum
+        
 
-        # Adding actions to drop down menus
-        fileMenu.addAction(clearAction)
-        fileMenu.addAction(recogniseAction)
+        # Uncomment if you want the output to be an inverted image
+        self.canvasImage.invertPixels()
+        self.scaledImage = self.canvasImage.scaled(28, 28)
+        
+        self.scaledImage.save('Tests/Numbers/digitDrawn.png')
+        self.canvasImage.invertPixels()
+
+        recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
+        Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
+        global Model_Mismatch
+
+        def showGraph(self):
+            ShowProbabilityGraph(Data)
+
+        # Try and except to check if a model is loaded, if not, present error to train model
+        if(MNIST_DOWNLOADED == True):
+            if(M_Initialised == True):
+                if(flag == 0):
+                    model_NotSelectedMsg()
+
+                elif(flag == 1):
+                    try:
+                        # Display probability graph if button clicked, otherwise append most likely number
+                        self.probability.clear()
+                        loadModel = model1.load_state_dict(torch.load('model\model.pth', map_location = device))
+                        probabilityCalc(Data)
+
+                        self.probability.append(str(PredictedNum))
+                        self.displayGraph.clicked.connect(showGraph)
+
+                    except RuntimeError:
+                        model_MismatchMsg()
+
+                elif(flag == 2):
+                    try:
+                        # Display probability graph if button clicked, otherwise append most likely number
+                        self.probability.clear()
+                        loadModel = model2.load_state_dict(torch.load('model\model.pth', map_location = device))
+                        probabilityCalc(Data)
+                        self.probability.append(str(PredictedNum))
+                        self.displayGraph.clicked.connect(showGraph)
+
+                    except RuntimeError:
+                        model_MismatchMsg()
+            elif(M_Initialised == False):
+                if(flag == 0):
+                    model_NotSelectedMsg()
+                else:
+                    model_NotTrainedMsg()
+        elif(MNIST_DOWNLOADED == False):
+            model_MNISTNotDownloadedMsg()
 
 
-    # Close parent window
-    def closeEvent(self, QCloseEvent):
-        self.parent.setWindowOpacity(1.)
+    def clear(self):
+        self.canvasImage.fill(Qt.white)
+        self.update()
+    
+
+
 
     # Check for mouse press
     def mousePressEvent(self, event):
@@ -284,61 +390,8 @@ class canvas(QMainWindow):
 
     # Paints stroke from when mouse is clicked and follows
     def paintEvent(self, event):
-        canvasPainter = QPainter(self)
+        canvasPainter = QPainter(self.canvasLabel.pixmap())
         canvasPainter.drawImage(self.rect(), self.canvasImage, self.canvasImage.rect())
-
-    # Save function for recognition
-    def saveAndRecognise(self):
-
-        # Uncomment if you want the output to be an inverted image
-        self.canvasImage.invertPixels()
-        self.scaledImage = self.canvasImage.scaled(28, 28)
-        
-        self.scaledImage.save('Tests/Numbers/digitDrawn.png')
-        self.canvasImage.invertPixels()
-
-        recognitionDataset = datasets.ImageFolder("Tests", transform = datasetTransform2)
-        Data = data.DataLoader(dataset = recognitionDataset, batch_size = 1, shuffle = False)
-        global Model_Mismatch
-
-        # Try and except to check if a model is loaded, if not, present error to train model
-        if(MNIST_DOWNLOADED == True):
-            if(M_Initialised == True):
-                if(flag == 0):
-                    model_NotSelectedMsg()
-                elif(flag == 1):
-                    try:
-                        loadModel = model1.load_state_dict(torch.load('model\model.pth', map_location = device))
-                        ShowProbabilityGraph(Data)
-                    except RuntimeError:
-                        model_MismatchMsg()
-                elif(flag == 2):
-                    try:
-                        loadModel = model2.load_state_dict(torch.load('model\model.pth', map_location = device))
-                        ShowProbabilityGraph(Data)
-                    except RuntimeError:
-                        model_MismatchMsg()
-            elif(M_Initialised == False):
-                if(flag == 0):
-                    model_NotSelectedMsg()
-                else:
-                    model_NotTrainedMsg()
-        elif(MNIST_DOWNLOADED == False):
-            model_MNISTNotDownloadedMsg()
-
-
-    def clear(self):
-        self.canvasImage.fill(Qt.white)
-        self.update()
-
-
-
-# This class manages the main window and all the drop downs to train model and view images
-class mainWindow(QMainWindow):
-
-    def __init__(self):
-        super().__init__()
-        self.initUI()
         
 
     # Popup window for train model view
@@ -979,7 +1032,7 @@ class mainWindow(QMainWindow):
         viewTrainingImages.triggered.connect(self.openTrainedImages)
 
         drawingCanvas = QAction('Drawing Canvas', self)
-        drawingCanvas.triggered.connect(self.callAnotherQMainWindow)
+        drawingCanvas.triggered.connect(self.createCanvas)
 
         
         viewTestingImages = QAction('View Testing Images', self)
