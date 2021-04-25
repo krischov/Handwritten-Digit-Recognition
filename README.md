@@ -12,9 +12,11 @@ You will also need Python 3.8.5/3.8.8 installed along with an editor to run the 
 
 
 Running the Application:
-- Open Scripts -> main.py
+- Open Folder - project-1-team_34
+- Double click the **main.py** script in the **Scripts** folder
 - Click Run and Debug on the left panel and select your Python Interpreter.
 - The program should now open and can be used.
+    * Ensure that the **whole directory** of the contents is **opened** on your editor
 
 Training a model:
 - To train a model, select File -> Train Model View
