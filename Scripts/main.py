@@ -361,6 +361,8 @@ class mainWindow(QMainWindow):
     def clear(self):
         self.canvasImage.fill(Qt.white)
         self.update()
+        self.probability.clear()
+
     
 
 
