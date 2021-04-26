@@ -240,6 +240,10 @@ datasetTransform2 = transforms.Compose([
 
 
 # This class manages the main window and all the drop downs to train model and view images
+# The inspiration for this method of implementing a drawing canvas was using the 
+        # source: https://www.mfitzp.com/tutorials/bitmap-graphics/
+        # The exact implementation was not ideal which is why the layout, functions, and features
+        # were switched up to closely match our project brief.
 class mainWindow(QMainWindow):
     global PredictedNum
     def __init__(self):
@@ -357,17 +361,14 @@ class mainWindow(QMainWindow):
         elif(MNIST_DOWNLOADED == False):
             model_MNISTNotDownloadedMsg()
 
-
+    # Function that clears the canvas, and also clears the predicted value from widget
     def clear(self):
         self.canvasImage.fill(Qt.white)
         self.update()
         self.probability.clear()
 
-    
 
-
-
-    # Check for mouse press
+    # Check for mouse press, input is recognised as the left mouse button
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.drawing = True
@@ -384,7 +385,7 @@ class mainWindow(QMainWindow):
             self.lastPoint = event.pos()
             self.update()
 
-    # Check mouse release
+    # Check mouse release, input is recognised when left mouse button is released
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.drawing = False
@@ -1031,8 +1032,9 @@ class mainWindow(QMainWindow):
     # Initialises UI for the main window
     def initUI(self):
         viewTrainingImages = QAction('View Training Images', self)
-        viewTrainingImages.triggered.connect(self.openTrainedImages)
-
+        viewTrainingImages.triggered.connect
+        
+        
         drawingCanvas = QAction('Drawing Canvas', self)
         drawingCanvas.triggered.connect(self.createCanvas)
 
