@@ -71,8 +71,8 @@ Digit Recogniser Version **1.00**
     * Button to show entire probability graph for user added. Opens up new window.
   
   
-Digit Recogniser Version **0.24**
-- Changes:
+Digit Recogniser Version **0.24**  
+Changes:
     * Images are now scaled when viewing the MNIST images.
 
 
