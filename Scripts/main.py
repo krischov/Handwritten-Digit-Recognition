@@ -53,7 +53,7 @@ M_TRAINED = "NONE"
 
 M_ACCURACY = 0
 
-#Linear Model
+#Linear Model with 1 input layer, 3 hidden layers and 1 output layer
 class TestNet(nn.Module):
   def __init__(self):
     super(TestNet, self).__init__()
@@ -64,22 +64,27 @@ class TestNet(nn.Module):
     self.l5 = nn.Linear(144, 10)
 
   def forward(self, x):
+      #Flattens data
     x = x.view(-1, 784)
+    #Performs ReLU
     x = F.relu(self.l1(x))
     x = F.relu(self.l2(x))
     x = F.relu(self.l3(x))
     x = F.relu(self.l4(x))
     x = self.l5(x)
+    #Log softmax so the probabilites of each class is obtained
     return F.log_softmax(x)
   
 #Convolutional Model
 class ConvNet(nn.Module):
   def __init__(self):
     super(ConvNet, self).__init__()
+    #2 convolutional layers with Relu and pooling
     self.conv1 = nn.Conv2d(in_channels = 1, out_channels = 28, kernel_size = 5, padding = 2)
     self.conv2 = nn.Conv2d(in_channels = 28, out_channels = 156,  kernel_size = 3, padding = 1)
     self.Pool = nn.MaxPool2d(2 , 2)
     self.l1 = nn.Linear(156*7*7, 156)
+    #linear output layer
     self.l2 = nn.Linear(156 , 10)
 
   def forward(self, x):
@@ -91,22 +96,27 @@ class ConvNet(nn.Module):
     x = F.relu(x)
     x = self.Pool(x)
 
+    #Flattens data for the linear layer
     x = x.view(-1, 156*7*7)
 
     x = F.relu(self.l1(x))
     x = self.l2(x)
+    #Log softmax so the probabilites of each class is obtained
     return F.log_softmax(x)
 
 # Neural network configuration and creation
+
+#Initialises models, sends those to the correct device, defines loss function and optimisers.
 model1 = TestNet()
 model1.to(device)
 model2 = ConvNet()
 model2.to(device)
-criterion = nn.NLLLoss()
+criterion = nn.NLLLoss() #Loss function
 optimizer1 = optim.SGD(model1.parameters(), lr = learning_rate, momentum = 0.5)
 optimizer2 = optim.SGD(model2.parameters(), lr = learning_rate, momentum = 0.5)
 
 #Methods for error messages
+#Model and trained model arent the same
 def model_MismatchMsg():
     msg = QMessageBox()
     msg.setIcon(QMessageBox.Critical)
@@ -114,6 +124,7 @@ def model_MismatchMsg():
     msg.setText("Selected model and trained model are not the same.")
     x = msg.exec_()
     
+#Model is not trained
 def model_NotTrainedMsg():
     msg = QMessageBox()
     msg.setIcon(QMessageBox.Critical)
@@ -121,6 +132,7 @@ def model_NotTrainedMsg():
     msg.setText("Please train model.")
     x = msg.exec_()
 
+#MNIST is not downloaded
 def model_MNISTNotDownloadedMsg():
     msg = QMessageBox()
     msg.setIcon(QMessageBox.Critical)
@@ -128,6 +140,7 @@ def model_MNISTNotDownloadedMsg():
     msg.setText("MNIST is not downloaded!")
     x = msg.exec_()
 
+#Model is not selected
 def model_NotSelectedMsg():
     msg = QMessageBox()
     msg.setIcon(QMessageBox.Critical)
@@ -136,44 +149,52 @@ def model_NotSelectedMsg():
     x = msg.exec_()
 
 # Tests for accuracy of the model and prints a percentage
+#This function was heavily inspired from the lab documentation 
+:   #Source: https://colab.research.google.com/drive/1EGMH2qYQydshkOCXpciKhI2NXNJDfcyQ?usp=sharing
 def testAccuracyModel(LOADER):
+    #Check if in linear model mode
     if(flag == 1):
         model1.eval()
         Test_Correct = 0
         Loader_size = len(LOADER.dataset)
         for data, target in LOADER:
-            data, target = data.to(device), target.to(device)
+            data, target = data.to(device), target.to(device) #send to proper device
             output = model1(data)
             pred = output.data.max(1, keepdim=True)[1]
-            Test_Correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+            Test_Correct += pred.eq(target.data.view_as(pred)).cpu().sum() #Check if prediciton was correct
         Accuracy = 100 * (Test_Correct/Loader_size)
         return Accuracy
+    #Check if in convolutional model mode
     elif(flag == 2):
         model2.eval()
         Test_Correct = 0
         Loader_size = len(LOADER.dataset)
         for data, target in LOADER:
-            data, target = data.to(device), target.to(device)
-            output = model2(data)
+            data, target = data.to(device), target.to(device) #send to proper device
+            output = model2(data) #get output
             pred = output.data.max(1, keepdim=True)[1]
-            Test_Correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+            Test_Correct += pred.eq(target.data.view_as(pred)).cpu().sum() #Check if prediciton was correct
         Accuracy = 100 * (Test_Correct/Loader_size)
         return Accuracy       
 
 
 
 # Probability graph when using Linear or Convolutional method
+# The implementation of the exponents was inspired by: 
+    #Source: https://towardsdatascience.com/handwritten-digit-mnist-pytorch-977b5338e627
+    #Refer to step 6.
 def ShowProbabilityGraph(Loader):
     global PredictedNum
     PredictedNum = 0
     if(flag == 1): 
         data, target = next(iter(Loader))
-        data, target = data.to(device), target.to(device)
-        img = data[0].view(1, 784)
-        ConvertedLogValue = torch.exp(model1(img))
-        ConvertedLogValue = ConvertedLogValue.cpu()
-        ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-        PredictedNum = ProbabilityList.index(max(ProbabilityList))
+        data, target = data.to(device), target.to(device) #Send to correct device
+        img = data[0].view(1, 784) #Flatten saved image
+        ConvertedLogValue = torch.exp(model1(img)) #exponential to convert from logsoftmax to softmax
+        ConvertedLogValue = ConvertedLogValue.cpu() 
+        ProbabilityList = list(ConvertedLogValue.detach().numpy()[0]) #List of all class probabilites
+        PredictedNum = ProbabilityList.index(max(ProbabilityList)) #Index with the highest probability number is the predicted num
+        #Plot classes against probabilities
         label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
         plt.barh(label,ProbabilityList)
         plt.title('The Predicted Number is: %i'  %PredictedNum)
@@ -183,13 +204,13 @@ def ShowProbabilityGraph(Loader):
 
     elif(flag == 2):
         data, target = next(iter(Loader))
-        data, target = data.to(device), target.to(device)
-        img = data[0].unsqueeze(0)
-        ConvertedLogValue = torch.exp(model2(img))
+        data, target = data.to(device), target.to(device) #Send to correct device
+        img = data[0].unsqueeze(0) #Get all dimensions for saved image
+        ConvertedLogValue = torch.exp(model2(img)) #exponential to convert from logsoftmax to softmax
         ConvertedLogValue = ConvertedLogValue.cpu()
-        ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
-        PredictedNum = ProbabilityList.index(max(ProbabilityList))
-        
+        ProbabilityList = list(ConvertedLogValue.detach().numpy()[0]) #List of all class probabilites
+        PredictedNum = ProbabilityList.index(max(ProbabilityList)) #Index with the highest probability number is the predicted num
+        #Plot classes against probabilities
         label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
         plt.barh(label,ProbabilityList)
         plt.title('The Predicted Number is: %i'  %PredictedNum)
@@ -199,9 +220,13 @@ def ShowProbabilityGraph(Loader):
 
 
 # Calculate predicted number from drawn digit
+# Similar to above, however updates a global variable to show what number was predicted
+# Source: https://towardsdatascience.com/handwritten-digit-mnist-pytorch-977b5338e627
+# Refer to step 6.
 def probabilityCalc(Loader):
     global PredictedNum
     PredictedNum = 0
+    #Linear Mode
     if(flag == 1): 
         data, target = next(iter(Loader))
         data, target = data.to(device), target.to(device)
@@ -210,7 +235,7 @@ def probabilityCalc(Loader):
         ConvertedLogValue = ConvertedLogValue.cpu()
         ProbabilityList = list(ConvertedLogValue.detach().numpy()[0])
         PredictedNum = ProbabilityList.index(max(ProbabilityList))
-
+    #Convolutional Mode 
     elif(flag == 2):
         data, target = next(iter(Loader))
         data, target = data.to(device), target.to(device)
@@ -229,7 +254,7 @@ datasetTransform = transforms.Compose([
 
 #Transform for our own digit
 datasetTransform2 = transforms.Compose([
-    transforms.Grayscale(num_output_channels=1),
+    transforms.Grayscale(num_output_channels=1), #ensures image is 1-channel
     transforms.ToTensor(),
     transforms.Normalize((0.5), (0.5)),
 ])
@@ -328,7 +353,7 @@ class mainWindow(QMainWindow):
             if(M_Initialised == True):
                 if(flag == 0):
                     model_NotSelectedMsg()
-
+                #Linear Mode
                 elif(flag == 1):
                     try:
                         # Display probability graph if button clicked, otherwise append most likely number
@@ -340,8 +365,9 @@ class mainWindow(QMainWindow):
                         self.displayGraph.clicked.connect(showGraph)
 
                     except RuntimeError:
+                        #Error message
                         model_MismatchMsg()
-
+                #Convolutional Mode
                 elif(flag == 2):
                     try:
                         # Display probability graph if button clicked, otherwise append most likely number
@@ -352,7 +378,7 @@ class mainWindow(QMainWindow):
                         self.displayGraph.clicked.connect(showGraph)
 
                     except RuntimeError:
-                        model_MismatchMsg()
+                        model_MismatchMsg() 
             elif(M_Initialised == False):
                 if(flag == 0):
                     model_NotSelectedMsg()
@@ -407,21 +433,30 @@ class mainWindow(QMainWindow):
 
         # Creating text box to append download progress status
         msg = QTextBrowser()
+
+        #Every time the dialog box is opened, check MNIST state
         if(MNIST_DOWNLOADED == True):
             MNIST_STATE = "YES"
         else: MNIST_STATE = "NO"
 
+        #Every time the dialog box is opened, check ACCURACY value
         if(M_ACCURACY == 0):
             Accuracy = "UNDEFINED as no model is trained."
         else: Accuracy =  "{}%".format(M_ACCURACY)
 
         msg.append("MNIST Downloaded: " + MNIST_STATE)
+        #Every time the dialog box is opened, check ACCURACY value
         msg.append("Trained Model is: " + M_TRAINED)
+
         msg.append("Model Accuracy is: " + Accuracy)
     
         # Function to download the MNIST dataset
         def downloadDataset(self):
             completed = 0
+
+            #Attempt to download the train and test sets from mnist, then attempt to load the sets into the train and test loaders for the ai.
+            #The train/test sets and loaders are updates globally so they can be accessed anywhere.
+            #If this is performed successfully, update the Global MNIST downloaded flag.
             try:
                 msg.append('Working...')
                 global trainData
@@ -439,9 +474,11 @@ class mainWindow(QMainWindow):
                 msg.append('MNIST Dataset Successfully Downloaded')
                 global MNIST_DOWNLOADED
                 MNIST_DOWNLOADED = True
+            #If the download fails, do not crash the program and instead print out an error message.
             except: 
                 msg.append('HTTP Error 503: Service Unavailable')
                 msg.append('Please Locally Install MNIST Dataset into Data folder.')
+            #At the end of the function, fill the progress bar as to indicate the function is completed.
             progressBar.setValue(100)
 
 
@@ -450,18 +487,23 @@ class mainWindow(QMainWindow):
             if(MNIST_DOWNLOADED == True):
 
                 # Trains the model over x amount of epochs (10 in this case)
+                #The training function of the model was inspired by the lab work.
+                    #Source: https://colab.research.google.com/drive/1EGMH2qYQydshkOCXpciKhI2NXNJDfcyQ?usp=sharing
+                    # Refer to last block of code.
                 def TrainOverEpochs(epochNum):
                     global progress
                     global M_Initialised
                     global M_TRAINED
                     global M_ACCURACY
-                    final_accuracy = 0
+                    final_accuracy = 0 
                     Percentage_Progress = 0
-                    account = 0
-                    flag_local = 0
+                    account = 0 #Adjustment amount for total progress
+                    flag_local = 0 #Flag for progress calculaton
+                    #No model selected
                     if(flag == 0):
                         msg.append("Model must be selected.")
                         progressBar.setValue(100)
+                    #Linear Mode
                     elif(flag == 1):
                         msg.append("Training Linear Model...")
                         for epoch in range (1, epochNum + 1):
@@ -469,26 +511,26 @@ class mainWindow(QMainWindow):
                             for i, (data, target) in enumerate(trainLoader):
 
                                 #Code that trains the model
-                                data, target = data.to(device), target.to(device)
-                                optimizer1.zero_grad()
-                                output = model1(data)
-                                loss = criterion(output, target)
-                                loss.backward()
-                                optimizer1.step()
+                                data, target = data.to(device), target.to(device) #send data to correct device
+                                optimizer1.zero_grad() #Clear any calculated gradients
+                                output = model1(data) #Get model output
+                                loss = criterion(output, target) #Calculate loss
+                                loss.backward() # get loss gradients
+                                optimizer1.step() #Optimise weights
 
                                 # Ensuring calculations are not done too frequently
                                 if (i % 10 == 0):
 
                                     #Code that keeps track of the training progress
-                                    Batch_Progress = (i/(len(trainLoader)))
-                                    Percentage_Progress = Batch_Progress * 100
+                                    Batch_Progress = (i/(len(trainLoader))) 
+                                    Percentage_Progress = Batch_Progress * 100 #Percentage of batch completed
                                     if(flag_local == 0):
                                         if(Percentage_Progress == 0):
                                             flag_local = 1
                                     elif(flag_local == 1):
                                         if(Percentage_Progress == 0):
                                             account += (100/(epochNum))
-                                    Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account)
+                                    Current_Training_Progress = round(Percentage_Progress*(1/epochNum) + account) #True progress calculation
                                     
                                 # Append current status to progress bar
                                 progress = int(Current_Training_Progress)
@@ -507,7 +549,9 @@ class mainWindow(QMainWindow):
                             # Saves model so you don't need to retrain
                             torch.save(model1.state_dict(), 'model\model.pth')
                             M_Initialised = True
-
+                    #Convolutional Mode
+                    #Note commenting is very similar to above (due to identical nature)
+                    #Commenting removed to reduce clutter
                     elif(flag == 2):
                         msg.append("Training Convolutional Model...")
                         for epoch in range (1, epochNum + 1):
@@ -565,33 +609,41 @@ class mainWindow(QMainWindow):
             global M_TRAINED
             global M_Initialised
             if(MNIST_DOWNLOADED == True):
+                #Error message code for when model is not selected
                 if(flag == 0):
                     msg3 = QMessageBox()
                     msg3.setIcon(QMessageBox.Critical)
                     msg3.setWindowTitle("Model Unselected")
                     msg3.setText("Please select the model type you wish to load.")
                     x = msg3.exec_()
+                    #Linear Mode
                 elif(flag == 1):
                     try:
+                        #Check if the right mode is selected by loading the model
                         loadModel = model1.load_state_dict(torch.load('Saved Model\Linear\model.pth', map_location = device))
                         msg.append("Working...")
                         progressBar.setValue(0)
+                        #Obtain accuracy of loaded model
                         accuracy = round(float((testAccuracyModel(testLoader))), 2)
                         finalAccuracy = round(float(accuracy), 2)
+                        #Update global variables
                         M_ACCURACY = finalAccuracy
                         M_TRAINED = "Linear"
                         msg.append("Pretrained Linear Model is loaded.")
                         msg.append(("Model Accuracy is: {}%".format(finalAccuracy)))
+                        #Finally save the model to the 'Active' folder
                         torch.save(model1.state_dict(), 'model\model.pth')
                         M_Initialised = True
                         progressBar.setValue(100)
                     except RuntimeError:
+                        #Error message for when trying to load a model in the wrong model mode
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
                         msg1.setWindowTitle("Error")
                         msg1.setText("Model does not match selected model")
                         x = msg1.exec_()
                     except FileNotFoundError:
+                        #Error message for when no file is found in linear folder 
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
                         msg1.setWindowTitle("Error")
@@ -599,26 +651,32 @@ class mainWindow(QMainWindow):
                         x = msg1.exec_()                        
                 elif(flag == 2):
                     try:
+                        #Check if the right mode is selected by loading the model
                         loadModel = model2.load_state_dict(torch.load('Saved Model\Convolutional\model.pth', map_location = device))
                         msg.append("Working...")
                         progressBar.setValue(0)
+                        #Obtain accuracy of loaded model
                         M_ACCURACY = testAccuracyModel(testLoader)
                         accuracy = round(float((testAccuracyModel(testLoader))), 2)
                         finalAccuracy = round(float(accuracy), 2)
+                        #Update global variables
                         M_ACCURACY = finalAccuracy
                         M_TRAINED = "Convolutional"
                         msg.append("Pretrained Convolutional Model is loaded.")
                         msg.append(("Model Accuracy is: {}%".format(finalAccuracy)))
+                        #Finally save the model to the 'Active' folder
                         torch.save(model2.state_dict(), 'model\model.pth')
                         M_Initialised = True
                         progressBar.setValue(100)
                     except RuntimeError:
+                        #Error message for when trying to load a model in the wrong model mode
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
                         msg1.setWindowTitle("Error")
                         msg1.setText("Model does not match selected model")
                         x = msg1.exec_()
                     except FileNotFoundError:
+                        #Error message for when no file is found in linear folder 
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
                         msg1.setWindowTitle("Error")
@@ -630,40 +688,51 @@ class mainWindow(QMainWindow):
         def SaveModel(self):
             if(MNIST_DOWNLOADED == True):
                 if(flag == 0):
+                    #Error message if no model is selected
                     msg3 = QMessageBox()
                     msg3.setIcon(QMessageBox.Critical)
                     msg3.setWindowTitle("Model Unselected")
                     msg3.setText("Please select the model type you wish to save.")
                     x = msg3.exec_()
+                    #Linear model
                 elif(flag == 1):
                     try:
+                        #First check to see if the model is the right type by loading it as a linear model
                         loadModel = model1.load_state_dict(torch.load('model\model.pth', map_location = device))
+                        #If this passes, save it.
                         torch.save(model1.state_dict(), 'Saved Model\Linear\model.pth')
                         msg.append("Linear Model has been saved.")
                     except (RuntimeError):
+                        #If model is of wrong type, display this image
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
                         msg1.setWindowTitle("Error")
                         msg1.setText("Model type in 'model' folder does not match selected model")
                         x = msg1.exec_()
                     except FileNotFoundError:
+                        #Error message if there no 'active' model
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
                         msg1.setWindowTitle("Error")
                         msg1.setText("There is no model to be saved")
                         x = msg1.exec_()
+                #Convolutional Mode
                 elif(flag == 2):
                     try:
+                        #First check to see if the model is the right type by loading it as a convolutional model
                         loadModel = model2.load_state_dict(torch.load('model\model.pth', map_location = device))
+                        #If this passes, save it.
                         torch.save(model2.state_dict(), 'Saved Model\Convolutional\model.pth')
                         msg.append("Convolutional Model has been saved.")
                     except RuntimeError:
+                        #If model is of wrong type, display this image
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
                         msg1.setWindowTitle("Error")
                         msg1.setText("Model type in 'model' folder does not match selected model")
                         x = msg1.exec_()
                     except FileNotFoundError:
+                        #Error message if there no 'active' model
                         msg1 = QMessageBox()
                         msg1.setIcon(QMessageBox.Critical)
                         msg1.setWindowTitle("Error")
@@ -681,13 +750,13 @@ class mainWindow(QMainWindow):
         PreloadButton.clicked.connect(usePreloadedModel)
         SaveButton.clicked.connect(SaveModel)
 
-        # Changes to linear model
+        # Changes to linear model mode
         def changeToLinearModel(self):
             global flag
             flag = 1
             msg.append(("Switched to Linear Model."))
 
-        # Changes to convolutional model
+        # Changes to convolutional model mode
         def changeToConvModel(self):
             global flag
             flag = 2
@@ -704,6 +773,7 @@ class mainWindow(QMainWindow):
         widgetGrid = QGridLayout()
 
         # Function which activates model depending on option chosen
+        #Global flag value 
         def onActivated(modelIndex):
             global Current_Model_Index
             Current_Model_Index = modelIndex
@@ -1032,7 +1102,7 @@ class mainWindow(QMainWindow):
     # Initialises UI for the main window
     def initUI(self):
         viewTrainingImages = QAction('View Training Images', self)
-        viewTrainingImages.triggered.connect
+        viewTrainingImages.triggered.connect(self.openTrainedImages)
         
         
         drawingCanvas = QAction('Drawing Canvas', self)
