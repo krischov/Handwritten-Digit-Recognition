@@ -150,7 +150,7 @@ def model_NotSelectedMsg():
 
 # Tests for accuracy of the model and prints a percentage
 #This function was heavily inspired from the lab documentation 
-:   #Source: https://colab.research.google.com/drive/1EGMH2qYQydshkOCXpciKhI2NXNJDfcyQ?usp=sharing
+   #Source: https://colab.research.google.com/drive/1EGMH2qYQydshkOCXpciKhI2NXNJDfcyQ?usp=sharing
 def testAccuracyModel(LOADER):
     #Check if in linear model mode
     if(flag == 1):
