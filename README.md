@@ -59,21 +59,21 @@ Viewing MNIST Testing/Training Images:
 Format:
 
 Digit Recogniser Version **1.01**
-    Changes:
-        - Method added to clear the recognised number.
+- Changes:
+    * Method added to clear the recognised number.
 
 
 Digit Recogniser Version **1.00**
-    Changes:
-        - Canvas is now accesible directly from the main window.
-        - Predicted Number that was drawn will display in a read only fashion.
-        - Entire class for drawing canvas was removed due to the integration with the main window - 100's of code lines removed.
-        - Button to show entire probability graph for user added. Opens up new window.
+- Changes:
+    * Canvas is now accesible directly from the main window.
+    * Predicted Number that was drawn will display in a read only fashion.
+    * Entire class for drawing canvas was removed due to the integration with the main window - 100's of code lines removed.
+    * Button to show entire probability graph for user added. Opens up new window.
   
   
- Digit Recogniser Version **0.24**
-    Changes:
-        - Images are now scaled when viewing the MNIST images.
+Digit Recogniser Version **0.24**
+- Changes:
+    * Images are now scaled when viewing the MNIST images.
 
 
   Digit Recogniser Version **0.23**
