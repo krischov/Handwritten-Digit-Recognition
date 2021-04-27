@@ -68,21 +68,21 @@ You will also need Python 3.8.5/3.8.8 installed along with an editor to run the 
         * Images are now scaled when viewing the MNIST images.  
 
 
-    Version **0.23**  
+    Version 0.23  
         * Instead of being able to load and save only one model, the program can now save one convolutional model and one linear model respectively.
         * Higher accuracy pretrained model added to convolutional model folder.
         * Models can now be loaded irrespective of the device.
         * Added messages for loading and saving.  
         
         
-    Version **0.22**  
+    Version 0.22  
         * Implemented a function that allows the user to save a model.
         * Implemented a function that allows the user to load a model.
         * Added high accuracy linear pretrained model.
         * Exceptions added to the functions so crashes do not occur. For example, attempting to load a model of the wrong type.  
 
 
-    Version **0.21**  
+    Version 0.21  
         *  Removed cancel button from training window as it served no useful functionality.
         *  Added variables to keep track of MNIST downloaded state, what model is trained, and what that model accuracy was.
         *  Opening the training window will now show if MNIST is downloaded, what model is trained and what accuracy the model has.
@@ -90,104 +90,104 @@ You will also need Python 3.8.5/3.8.8 installed along with an editor to run the 
         *  Fixed event where two error messages would pop up.  
 
 
-    Version **0.20**  
+    Version 0.20  
         * Addded error cases to prevent program crashing if MNIST was not downloaded
         * Added more error cases.  
 
 
-    Version **0.19**  
+    Version 0.19  
         * Added a DownloadMNIST button and method in the training menu.  
 
 
-    Version **0.18**  
+    Version 0.18  
         * The entire training and test dataset can now be viewed instead of only one batch. 
         * This includes all 60000 training images and 10000 testing images.
         * Added a page system where 36 images are viewed at a time.  
 
 
-    Version **0.17**  
+    Version 0.17  
         * Added warning to when trying to train convolutional without CUDA due to time.
         * Increased linear model accuracy.
         * Model state is now remembered when reopening the training dialog i.e. if convolutional is selected it will be remembered.  
 
 
-    Version **0.16**  
+    Version 0.16  
         * Dropdown combobox menu is now added. This allows for model switching between convolutional and linear.
         * Edited flag to be zero if no model is selected (i.e. a model should be selected) * (3  model states)  
 
 
-    Version **0.15**  
+    Version 0.15  
         * Testing and training images can now be viewed (Only one batch).  
 
 
-    Version **0.14**  
+    Version 0.14  
         * Probability graph implemented, allows to see the probability of number classes based on the model input.
         * Linear model can now view canvas image.  
 
 
-    Version **0.13**  
+    Version 0.13  
         * Workers added to train loader to speed it up.
         * Convolutional model added.
         * Model is now saved at the end of training.  
 
 
-    Version **0.12**  
+    Version 0.12  
         * Added progressbar to work with the training function. Can now see state of training progress.
         * Resolved error for training function * when using CUDA as a device.  
 
 
-    Version **0.11**  
+    Version 0.11  
         * Error downloading MNIST from source, so local files are used.
         * Simplified TrainOverEpochs.  
       
 
-    Version **0.10**  
+    Version 0.10  
         * Added scaling functionality to convert from our drawing size to a 28,28 size for loading and recognition.
         * Adjusted brush size so the output images are more representative.
         * Adding output files of numbers 0*9.  
 
 
-    Version **0.09**  
+    Version 0.09  
         * Added functionality for painting on the window using the mouse.
         * Actions were added to the 'Save' and 'Clear'  
 
 
-    Version **0.08**  
+    Version 0.08  
         * Implementation of ShowProbabilityGraph()
         * Takes in a loader. Converts the NN output into a list of probabilities. Constructs a Horizontal Probability Chart.  
 
 
-    Version **0.07**  
+    Version 0.07  
         * Added simple probability graph code.
         * Accounted for when number reaches the next ten. For example 19 *> 20, but training progress would display the incorrect number.
         * Removed trainModel and merged with TrainOverEpochs()
         * Implemented code to keep track of the percentage completion of training progress.  
 
 
-    Version **0.06**  
+    Version 0.06  
         * Added testModel base function, will be used to calculate our model accuracy.
         * Implemented TrainOverEpochs() which will train the model over epochNum epochs.
         * Will return the final model accuracy after training and will save the model.  
 
 
-    Version **0.05**  
+    Version 0.05  
         * Created skeleton code for training a model.
         * Set model, set model device, set loss function and optimizer.
         * Filled in Model Parameters.  
 
 
-    Version **0.04**  
+    Version 0.04  
         * Added a basic NN. Has 1 input and output layer, 5 hidden layers and uses LOGSOFTMAX for probability chart.
         * Added View Testing Images function into GUI.  
           
-    Version **0.03**  
+    Version 0.03  
         * Completed Train Model View dropdown GUI.
         * Added time, torch utils, and cuda libraries.
         * Inverted image on plot using scikit*image library
         * Added grayscale transform to make the image 3 channels.  
 
 
-    Version **0.02**  
+    Version 0.02  
         * Uploaded MNIST dataset.
         * Added download folders.
         * Added section for AI parameters.
@@ -196,7 +196,7 @@ You will also need Python 3.8.5/3.8.8 installed along with an editor to run the 
         * Added skeleton code for future methods.  
 
 
-    Version **0.01**  
+    Version 0.01  
         * Created Main.
         * Created Basic GUI.
       
