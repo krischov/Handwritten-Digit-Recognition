@@ -34,11 +34,11 @@ You will also need Python 3.8.5/3.8.8 installed along with an editor to run the 
 
 ## Drawing Digits:
 - To begin recognising your drawn digits, go to the main window and click View -> Drawing Canvas.
-    * This will open a sub-window which can be drawn on using your mouse. Click and hold the left mouse button to draw.
-- Once the digit is drawn, click **File -> Recognise** or **CTRL + R** to bring up the probability graph.
-- A new window will open displaying the likely probabilities of what the model thinks your digit is.
-    * Once you are finished with your drawn digit, close the probability window and clear the canvas before drawing again.
-- To clear the canvas, click **File -> Clear** or **CTRL + C**.
+    * This will open a canvas along with buttons to clear and recognise the drawn digit on the same window.
+- Once the digit is drawn, click **Recognise** and the most likely predicted value will be output on the text box.
+- If you wish to see the comprehensive view of the graph probabilities, click **Full Graph**
+    * Once you are finished with your drawn digit, clear the canvas before recognising again.
+- To clear the canvas, click **Clear**
 
 ## Viewing MNIST Testing/Training Images:
 - To view the MNIST Testing or Training Images, go to the main window and click **View -> View Training Images/View Testing Images**
